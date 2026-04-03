@@ -30,7 +30,7 @@ function BlogPage() {
 npx boneyard-js build
 ```
 
-```tsx
+```ts
 // app/layout.tsx — add once
 import './bones/registry'
 ```
@@ -41,6 +41,39 @@ Done. Every `<Skeleton name="...">` shows a pixel-perfect skeleton on load.
 
 ```bash
 npm install boneyard-js
+```
+
+## Framework adapters
+
+### React
+
+```tsx
+import { Skeleton } from 'boneyard-js/react'
+```
+
+### Svelte 5
+
+```svelte
+<script lang="ts">
+  import Skeleton from 'boneyard-js/svelte'
+  import ProfileCard from './ProfileCard.svelte'
+</script>
+
+<Skeleton name="profile-card" loading={isLoading}>
+  {#snippet fallback()}
+    <p>Loading profile...</p>
+  {/snippet}
+
+  <ProfileCard />
+</Skeleton>
+```
+
+Import the generated registry once in your app entry:
+
+```svelte
+<script lang="ts">
+  import '$lib/bones/registry.js'
+</script>
 ```
 
 ## What it does
@@ -68,6 +101,8 @@ npx boneyard-js build                    # auto-detect dev server
 npx boneyard-js build http://localhost:3000
 npx boneyard-js build --breakpoints 390,820,1440 --out ./public/bones
 ```
+
+The generated `registry.js` is framework-neutral and imports `registerBones` from `boneyard-js`.
 
 ## Links
 

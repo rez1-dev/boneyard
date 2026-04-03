@@ -17,6 +17,27 @@
     "./react": {
       "types": "./dist/react.d.ts",
       "import": "./dist/react.js"
+    },
+    "./svelte": {
+      "types": "./dist/svelte.d.ts",
+      "svelte": "./dist/Skeleton.svelte",
+      "default": "./dist/Skeleton.svelte"
+    }
+  },
+  "typesVersions": {
+    ">4.0": {
+      "index": [
+        "./dist/index.d.ts"
+      ],
+      "layout": [
+        "./dist/layout.d.ts"
+      ],
+      "react": [
+        "./dist/react.d.ts"
+      ],
+      "svelte": [
+        "./dist/svelte.d.ts"
+      ]
     }
   },
   "bin": {
@@ -27,9 +48,10 @@
     "bin"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-svelte",
+    "copy-svelte": "cp src/Skeleton.svelte dist/Skeleton.svelte && cp src/svelte.d.ts dist/svelte.d.ts",
     "test": "bun test",
-    "prepublishOnly": "tsc"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "skeleton",
@@ -49,10 +71,14 @@
     "@chenglou/pretext": "^0.0.3"
   },
   "peerDependencies": {
-    "react": ">=18"
+    "react": ">=18",
+    "svelte": ">=5"
   },
   "peerDependenciesMeta": {
     "react": {
+      "optional": true
+    },
+    "svelte": {
       "optional": true
     }
   },
@@ -62,8 +88,11 @@
   "devDependencies": {
     "@types/node": "^22.19.15",
     "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "canvas": "^3.2.2",
     "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "svelte": "^5.39.6",
     "typescript": "^5.7.0"
   }
 }

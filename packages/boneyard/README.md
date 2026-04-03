@@ -20,9 +20,24 @@ import { Skeleton } from 'boneyard-js/react'
 npx boneyard-js build
 ```
 
-```tsx
+```ts
 // app/layout.tsx
 import './bones/registry'
+```
+
+```svelte
+<script lang="ts">
+  import Skeleton from 'boneyard-js/svelte'
+  import ProfileCard from './ProfileCard.svelte'
+</script>
+
+<Skeleton name="profile-card" loading={isLoading}>
+  {#snippet fallback()}
+    <p>Loading profile...</p>
+  {/snippet}
+
+  <ProfileCard />
+</Skeleton>
 ```
 
 Done. See the [full documentation](https://github.com/0xGF/boneyard) for all props, CLI options, and examples.

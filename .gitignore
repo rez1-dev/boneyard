@@ -1,6 +1,10 @@
 node_modules/
 dist/
 .next/
+.svelte-kit/
+playwright-report/
+test-results/
+build/
 *.tsbuildinfo
 .env
 .env.local

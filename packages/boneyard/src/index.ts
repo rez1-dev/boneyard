@@ -4,6 +4,7 @@ import { renderBones } from './runtime.js'
 import type { SkeletonDescriptor } from './types.js'
 
 export type { Bone, SkeletonResult, ResponsiveBones, SkeletonDescriptor, ResponsiveDescriptor, SnapshotConfig } from './types.js'
+export { registerBones } from './shared.js'
 
 /**
  * Snapshot exact pixel positions of a rendered element as skeleton bones.

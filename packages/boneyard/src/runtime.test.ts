@@ -32,8 +32,8 @@ describe('renderBones', () => {
       ],
     }
     const html = renderBones(skel)
-    expect(html).toContain('left:0px;top:0px;width:400px;height:180px;border-radius:8px')
-    expect(html).toContain('left:0px;top:190px;width:200px;height:14px;border-radius:8px')
+    expect(html).toContain('left:0px;top:0px;width:400px;height:180px;border-radius:10px')
+    expect(html).toContain('left:0px;top:190px;width:200px;height:14px;border-radius:4px')
   })
 
   it('handles circle radius', () => {
@@ -51,7 +51,7 @@ describe('renderBones', () => {
     }
     const html = renderBones(skel)
     expect(html).toContain('boneyard-pulse')
-    expect(html).toContain('background:#e0e0e0')
+    expect(html).toContain('background-color:#e0e0e0')
   })
 
   it('no animation when disabled', () => {
