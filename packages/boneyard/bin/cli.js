@@ -97,65 +97,57 @@ if (config.resolveEnvVars && config.auth) {
     console.log(`  \x1b[2mLoading ${config.auth.cookies.length} cookie(s) from config\x1b[0m`)
     config.auth.cookies = config.auth.cookies.map(c => ({
       ...c,
-      value: resolveConfigValue(c.value)
+      value: replaceEnvStrings(c.value)
     }))
   }
   if (config.auth.headers) {
     const headerCount = Object.keys(config.auth.headers).length
     console.log(`  \x1b[2mLoading ${headerCount} header(s) from config\x1b[0m`)
     for (const [key, val] of Object.entries(config.auth.headers)) {
-      config.auth.headers[key] = resolveConfigValue(val)
+      config.auth.headers[key] = replaceEnvStrings(val)
     }
   }
 }
 
 /**
- * If value is just a plain value, return it
- * else return the resolved env var
- *
  * Only active if config.resolveEnvVars is true
+ * Resolves all `env[...]` in a config value
  *
- * @param {string} value 
- * Values resolved to environment variables look like this: 'env\[NAME\]'
- * (without the backslashes in actual JSON, obviously)
- *
- * @returns the resolved value
+ * @returns {string} the value with all env strings resolved
  */
-function resolveConfigValue(value) {
-  // toLowerCase will cause a crash without this check
-  // if value is a number or boolean
+function replaceEnvStrings(value) {
   if (typeof value !== 'string') {
     return value
   }
+  const regex = /env\[[^\]]*\]/g
+  return value.replace(regex, resolveEnv)
+}
 
-  if (
-    !value.toLowerCase().startsWith('env')
-    || !config.resolveEnvVars
-  ) {
-    return value
-  }
-
-  // extract name from env[NAME]
-  let envKey
-  const start = value.indexOf('[') + 1;
-  const end = value.indexOf(']');
-  if (end > start && end === value.length - 1) {
-    envKey = value.substring(start, end)
+/**
+ * @param {string} str 
+ * @returns the resolved env string 
+ */
+function resolveEnv(str) {
+  const start = str.indexOf('[') + 1;
+  const end = str.indexOf(']');
+  let key
+  if (end > start && end === str.length - 1) {
+    key = str.substring(start, end)
   } else {
     console.error(
-      `\nboneyard: could not parse environment variable: ${value}` +
+      `\nboneyard: could not parse environment variable: ${str}` +
       `\n  it should look like this: env[<VAR_NAME>]`
     )
     process.exit(1)
   }
 
-  const envValue = process.env[envKey]
-  if (envValue) {
-    return envValue 
+  const value = process.env[key]
+  if (value) {
+    return value
   } else {
     console.error(
-      `\nboneyard: no environment variable '${envKey} found'` +
-      `\n  try: export $${envKey}='...'`
+      `\nboneyard: no environment variable '${key} found'` +
+      `\n  try: export $${key}='...'`
     )
     process.exit(1)
   }
@@ -689,7 +681,7 @@ function printHelp() {
       "resolveEnvVars": true,
       "auth": {
         "cookies": [{ "name": "session", "value": "env[SESSION_TOKEN]" }],
-        "headers": { "Authorization": "env[TOKEN]" }
+        "headers": { "Authorization": "Bearer env[TOKEN]" }
       }
     }
 
