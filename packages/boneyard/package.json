@@ -1,6 +1,6 @@
 {
   "name": "boneyard-js",
-  "version": "1.6.1",
+  "version": "1.6.3",
   "description": "Pixel-perfect skeleton loading screens. Wrap your component in <Skeleton> and boneyard snapshots the real DOM layout — no manual descriptors, no configuration.",
   "type": "module",
   "main": "./dist/index.js",
@@ -17,6 +17,35 @@
     "./react": {
       "types": "./dist/react.d.ts",
       "import": "./dist/react.js"
+    },
+    "./svelte": {
+      "types": "./dist/svelte.d.ts",
+      "svelte": "./dist/Skeleton.svelte",
+      "default": "./dist/Skeleton.svelte"
+    },
+    "./react-native": {
+      "types": "./dist/native.d.ts",
+      "import": "./dist/native.js"
+    },
+    "./native": {
+      "types": "./dist/native.d.ts",
+      "import": "./dist/native.js"
+    }
+  },
+  "typesVersions": {
+    ">4.0": {
+      "index": [
+        "./dist/index.d.ts"
+      ],
+      "layout": [
+        "./dist/layout.d.ts"
+      ],
+      "react": [
+        "./dist/react.d.ts"
+      ],
+      "svelte": [
+        "./dist/svelte.d.ts"
+      ]
     }
   },
   "bin": {
@@ -24,12 +53,16 @@
   },
   "files": [
     "dist",
-    "bin"
+    "bin",
+    "native.js",
+    "native.d.ts"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-svelte",
+    "copy-svelte": "cp src/Skeleton.svelte dist/Skeleton.svelte && cp src/svelte.d.ts dist/svelte.d.ts",
+    "benchmark": "bun run scripts/benchmark-layout.ts",
     "test": "bun test",
-    "prepublishOnly": "tsc"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "skeleton",
@@ -37,6 +70,7 @@
     "loading",
     "placeholder",
     "react",
+    "react-native",
     "zero-layout-shift"
   ],
   "license": "MIT",
@@ -49,10 +83,18 @@
     "@chenglou/pretext": "^0.0.3"
   },
   "peerDependencies": {
-    "react": ">=18"
+    "react": ">=18",
+    "svelte": ">=5",
+    "react-native": ">=0.71"
   },
   "peerDependenciesMeta": {
     "react": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    },
+    "react-native": {
       "optional": true
     }
   },
@@ -62,8 +104,12 @@
   "devDependencies": {
     "@types/node": "^22.19.15",
     "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/react-native": "^0.73.0",
     "canvas": "^3.2.2",
     "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "svelte": "^5.39.6",
     "typescript": "^5.7.0"
   }
 }

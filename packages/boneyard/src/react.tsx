@@ -1,7 +1,18 @@
 import { useRef, useState, useEffect, type ReactNode } from 'react'
-import { snapshotBones } from './extract.js'
 import { normalizeBone } from './types.js'
 import type { Bone, AnyBone, SkeletonResult, ResponsiveBones, SnapshotConfig } from './types.js'
+import {
+  adjustColor,
+  ensureBuildSnapshotHook,
+  getRegisteredBones,
+  isBuildMode,
+  registerBones,
+  resolveResponsive,
+} from './shared.js'
+
+ensureBuildSnapshotHook()
+
+export { registerBones }
 
 // ── Global defaults ─────────────────────────────────────────────────────────
 export type AnimationStyle = 'pulse' | 'shimmer' | 'solid' | boolean
@@ -30,66 +41,6 @@ let globalConfig: BoneyardConfig = {}
  */
 export function configureBoneyard(config: BoneyardConfig): void {
   globalConfig = { ...globalConfig, ...config }
-}
-
-// ── Bones registry ──────────────────────────────────────────────────────────
-const bonesRegistry = new Map<string, SkeletonResult | ResponsiveBones>()
-
-/**
- * Register pre-generated bones so `<Skeleton name="...">` can auto-resolve them.
- *
- * Called by the generated `registry.js` file (created by `npx boneyard-js build`).
- * Import it once in your app entry point:
- *
- * ```ts
- * import './bones/registry'
- * ```
- */
-export function registerBones(map: Record<string, SkeletonResult | ResponsiveBones>): void {
-  for (const [name, bones] of Object.entries(map)) {
-    bonesRegistry.set(name, bones)
-  }
-}
-
-// ── Expose snapshotBones for CLI build mode (module-level, no useEffect) ────
-if (typeof window !== 'undefined' && (window as any).__BONEYARD_BUILD) {
-  (window as any).__BONEYARD_SNAPSHOT = snapshotBones
-}
-
-/** Pick the right SkeletonResult from a responsive set for the current width */
-function resolveResponsive(
-  bones: SkeletonResult | ResponsiveBones,
-  width: number,
-): SkeletonResult | null {
-  if (!('breakpoints' in bones)) return bones
-  const bps = Object.keys(bones.breakpoints).map(Number).sort((a, b) => a - b)
-  if (bps.length === 0) return null
-  const match = [...bps].reverse().find(bp => width >= bp) ?? bps[0]
-  return bones.breakpoints[match] ?? null
-}
-
-/** Mix a hex color toward white by `amount` (0–1). */
-function adjustColor(color: string, amount: number): string {
-  // Handle rgba
-  const rgbaMatch = color.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+))?\s*\)/)
-  if (rgbaMatch) {
-    const [, r, g, b, a = '1'] = rgbaMatch
-    const newAlpha = Math.min(1, parseFloat(a) + amount * 0.5)
-    return `rgba(${r},${g},${b},${newAlpha.toFixed(3)})`
-  }
-  // Handle hex
-  if (color.startsWith('#') && color.length >= 7) {
-    const r = parseInt(color.slice(1, 3), 16)
-    const g = parseInt(color.slice(3, 5), 16)
-    const b = parseInt(color.slice(5, 7), 16)
-    if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
-      const nr = Math.round(r + (255 - r) * amount)
-      const ng = Math.round(g + (255 - g) * amount)
-      const nb = Math.round(b + (255 - b) * amount)
-      return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`
-    }
-  }
-  return color
 }
 
 export interface SkeletonProps {
@@ -156,8 +107,6 @@ export function Skeleton({
   const [containerHeight, setContainerHeight] = useState(0)
   const [isDark, setIsDark] = useState(false)
 
-  const isBuildMode = typeof window !== 'undefined' && (window as any).__BONEYARD_BUILD === true
-
   // Auto-detect dark mode (watches both prefers-color-scheme and .dark class)
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -215,7 +164,7 @@ export function Skeleton({
   }
 
   // Build mode: render fixture (if provided) or children so CLI can capture bones
-  if (isBuildMode) {
+  if (isBuildMode()) {
     return (
       <div ref={containerRef} className={className} style={{ position: 'relative' }} {...dataAttrs}>
         <div>{fixture ?? children}</div>
@@ -225,7 +174,7 @@ export function Skeleton({
 
   // Resolve bones: explicit initialBones > registry lookup
   // Use viewport width to pick breakpoint since bones are keyed by viewport width
-  const effectiveBones = initialBones ?? (name ? bonesRegistry.get(name) : undefined)
+  const effectiveBones = initialBones ?? (name ? getRegisteredBones(name) : undefined)
   const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : containerWidth
   const activeBones = effectiveBones && containerWidth > 0
     ? resolveResponsive(effectiveBones, viewportWidth)
@@ -241,12 +190,12 @@ export function Skeleton({
 
   return (
     <div ref={containerRef} className={className} style={{ position: 'relative' }} {...dataAttrs}>
-      <div style={showSkeleton ? { visibility: 'hidden' } : undefined}>
+      <div data-boneyard-content="true" style={showSkeleton ? { visibility: 'hidden' } : undefined}>
         {showFallback ? fallback : children}
       </div>
 
       {showSkeleton && (
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+        <div data-boneyard-overlay="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             {(activeBones.bones as AnyBone[]).map((raw, i) => {
               const b = normalizeBone(raw)
@@ -268,7 +217,7 @@ export function Skeleton({
                 boneStyle.backgroundSize = '200% 100%'
                 boneStyle.animation = 'boneyard-shimmer 2.4s linear infinite'
               }
-              return <div key={i} style={boneStyle} />
+              return <div key={i} data-boneyard-bone="true" style={boneStyle} />
             })}
             {animationStyle === 'pulse' && (
               <style>{`@keyframes boneyard-pulse{0%,100%{background-color:${resolvedColor}}50%{background-color:${adjustColor(resolvedColor, isDark ? 0.04 : 0.3)}}}`}</style>

@@ -30,17 +30,65 @@ function BlogPage() {
 npx boneyard-js build
 ```
 
-```tsx
+```ts
 // app/layout.tsx — add once
 import './bones/registry'
 ```
 
 Done. Every `<Skeleton name="...">` shows a pixel-perfect skeleton on load.
 
+## React Native
+
+Works in Expo and bare React Native apps. Same bones format, different renderer.
+
+```tsx
+import { Skeleton } from 'boneyard-js/native'
+import cardBones from './bones/card.bones.json'
+
+<Skeleton loading={isLoading} initialBones={cardBones}>
+  <ProfileCard />
+</Skeleton>
+```
+
+Generate bones from your web build or write them by hand. See the [React Native docs](https://boneyard.vercel.app/react-native) for full setup.
+
 ## Install
 
 ```bash
 npm install boneyard-js
+```
+
+## Framework adapters
+
+### React
+
+```tsx
+import { Skeleton } from 'boneyard-js/react'
+```
+
+### Svelte 5
+
+```svelte
+<script lang="ts">
+  import Skeleton from 'boneyard-js/svelte'
+  import ProfileCard from './ProfileCard.svelte'
+</script>
+
+<Skeleton name="profile-card" loading={isLoading}>
+  {#snippet fallback()}
+    <p>Loading profile...</p>
+  {/snippet}
+
+  <ProfileCard />
+</Skeleton>
+```
+
+Import the generated registry once in your app entry:
+
+```svelte
+<script lang="ts">
+  import '$lib/bones/registry.js'
+</script>
 ```
 
 ## What it does
@@ -50,6 +98,44 @@ npm install boneyard-js
 - Renders them as gray rectangles that match your real layout exactly
 - Responsive — captures at multiple breakpoints (375px, 768px, 1280px by default)
 - Pulse animation shimmers to a lighter shade of whatever color you set
+
+## Layout API
+
+If you work with hand-authored or extracted descriptors, you can use the layout engine in two ways.
+
+### Default path
+
+```ts
+import { computeLayout } from "boneyard-js";
+
+const result = computeLayout(descriptor, 375);
+```
+
+This is the simple, backward-compatible path. The first call compiles the descriptor tree. Later calls with the same descriptor object reuse that compiled state automatically.
+
+### Explicit compiled path
+
+```ts
+import { compileDescriptor, computeLayout } from "boneyard-js";
+
+const compiled = compileDescriptor(descriptor);
+
+const mobile = computeLayout(compiled, 375);
+const desktop = computeLayout(compiled, 1280);
+```
+
+Use this when you know you will reuse the same descriptor many times and want to move the cold work up front.
+
+Examples:
+
+- SSR code rendering several breakpoints
+- descriptor registries loaded once at startup
+- responsive tools or animation loops that relayout often
+- benchmarks where you want to separate cold compile cost from hot relayout cost
+
+If you already use `computeLayout(descriptor, width)`, you do not need to change your code. `compileDescriptor()` is an optimization API, not a migration requirement.
+
+If you mutate the same descriptor object in place later, boneyard will detect that change and rebuild its compiled state automatically on the next layout call. You can also call `invalidateDescriptor(descriptor)` to force a rebuild immediately.
 
 ## Props
 
@@ -68,6 +154,8 @@ npx boneyard-js build                    # auto-detect dev server
 npx boneyard-js build http://localhost:3000
 npx boneyard-js build --breakpoints 390,820,1440 --out ./public/bones
 ```
+
+The generated `registry.js` is framework-neutral and imports `registerBones` from `boneyard-js`.
 
 ## Links
 
