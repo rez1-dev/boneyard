@@ -22,6 +22,14 @@
       "types": "./dist/svelte.d.ts",
       "svelte": "./dist/Skeleton.svelte",
       "default": "./dist/Skeleton.svelte"
+    },
+    "./react-native": {
+      "types": "./dist/native.d.ts",
+      "import": "./dist/native.js"
+    },
+    "./native": {
+      "types": "./dist/native.d.ts",
+      "import": "./dist/native.js"
     }
   },
   "typesVersions": {
@@ -45,7 +53,9 @@
   },
   "files": [
     "dist",
-    "bin"
+    "bin",
+    "native.js",
+    "native.d.ts"
   ],
   "scripts": {
     "build": "tsc && npm run copy-svelte",
@@ -60,6 +70,7 @@
     "loading",
     "placeholder",
     "react",
+    "react-native",
     "zero-layout-shift"
   ],
   "license": "MIT",
@@ -73,13 +84,17 @@
   },
   "peerDependencies": {
     "react": ">=18",
-    "svelte": ">=5"
+    "svelte": ">=5",
+    "react-native": ">=0.71"
   },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
     },
     "svelte": {
+      "optional": true
+    },
+    "react-native": {
       "optional": true
     }
   },
@@ -90,6 +105,7 @@
     "@types/node": "^22.19.15",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/react-native": "^0.73.0",
     "canvas": "^3.2.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

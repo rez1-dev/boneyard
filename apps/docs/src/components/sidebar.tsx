@@ -19,6 +19,7 @@ const navItems = [
   { href: "/performance", label: "Performance" },
   { href: "/ssr", label: "SSR" },
   { href: "/output", label: "Output" },
+  { href: "/react-native", label: "React Native" },
 ];
 
 const exampleItems = [
