@@ -1,0 +1,242 @@
+<script lang="ts">
+import { normalizeBone } from './types.js'
+import type { Bone, AnyBone, SkeletonResult, ResponsiveBones, SnapshotConfig } from './types.js'
+import {
+  adjustColor,
+  ensureBuildSnapshotHook,
+  getRegisteredBones,
+  isBuildMode,
+  registerBones,
+  resolveResponsive,
+} from './shared.js'
+
+export { registerBones }
+
+export type AnimationStyle = 'pulse' | 'shimmer' | 'solid' | boolean
+
+interface BoneyardConfig {
+  color?: string
+  darkColor?: string
+  animate?: AnimationStyle
+}
+
+let _globalConfig: BoneyardConfig = {}
+
+export function configureBoneyard(config: BoneyardConfig): void {
+  _globalConfig = { ..._globalConfig, ...config }
+}
+
+export function getGlobalConfig(): BoneyardConfig {
+  return _globalConfig
+}
+
+export interface SkeletonProps {
+  loading: boolean
+  name?: string
+  initialBones?: SkeletonResult | ResponsiveBones
+  color?: string
+  darkColor?: string
+  animate?: AnimationStyle
+  class?: string
+  snapshotConfig?: SnapshotConfig
+}
+</script>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+
+ensureBuildSnapshotHook()
+
+const props = withDefaults(defineProps<SkeletonProps>(), {
+  animate: 'pulse',
+})
+
+const containerRef = ref<HTMLElement | null>(null)
+const containerWidth = ref(0)
+const containerHeight = ref(0)
+const isDark = ref(false)
+const uid = Math.random().toString(36).slice(2, 8)
+
+const buildMode = isBuildMode()
+
+const rawAnimate = computed(() => props.animate ?? _globalConfig.animate ?? 'pulse')
+const animationStyle = computed<'pulse' | 'shimmer' | 'solid'>(() => {
+  const v = rawAnimate.value
+  return v === true ? 'pulse' : v === false ? 'solid' : v
+})
+
+const resolvedColor = computed(() =>
+  isDark.value
+    ? (props.darkColor ?? _globalConfig.darkColor ?? 'rgba(255,255,255,0.06)')
+    : (props.color ?? _globalConfig.color ?? 'rgba(0,0,0,0.08)')
+)
+
+const serializedSnapshotConfig = computed(() =>
+  props.snapshotConfig ? JSON.stringify(props.snapshotConfig) : undefined
+)
+
+const effectiveBones = computed(() =>
+  props.initialBones ?? (props.name ? getRegisteredBones(props.name) : undefined)
+)
+
+const viewportWidth = computed(() =>
+  typeof window !== 'undefined' ? window.innerWidth : containerWidth.value
+)
+
+const activeBones = computed(() =>
+  effectiveBones.value && containerWidth.value > 0
+    ? resolveResponsive(effectiveBones.value, viewportWidth.value)
+    : null
+)
+
+const showSkeleton = computed(() => props.loading && !!activeBones.value)
+const showFallback = computed(() => props.loading && !activeBones.value)
+
+const effectiveHeight = computed(() =>
+  containerHeight.value > 0 ? containerHeight.value : activeBones.value?.height ?? 0
+)
+
+const capturedHeight = computed(() => activeBones.value?.height ?? 0)
+
+const scaleY = computed(() =>
+  effectiveHeight.value > 0 && capturedHeight.value > 0
+    ? effectiveHeight.value / capturedHeight.value
+    : 1
+)
+
+const pulseColor = computed(() =>
+  adjustColor(resolvedColor.value, isDark.value ? 0.04 : 0.3)
+)
+
+function updateDarkMode() {
+  if (typeof window === 'undefined') return
+  isDark.value =
+    document.documentElement.classList.contains('dark') ||
+    !!containerRef.value?.closest('.dark')
+}
+
+function getBoneStyle(raw: AnyBone, scale: number, color: string, dark: boolean) {
+  const bone = normalizeBone(raw)
+  const radius = typeof bone.r === 'string' ? bone.r : `${bone.r}px`
+  const boneColor = bone.c ? adjustColor(color, dark ? 0.03 : 0.45) : color
+  return `position:absolute;left:${bone.x}%;top:${bone.y * scale}px;width:${bone.w}%;height:${bone.h * scale}px;border-radius:${radius};background-color:${boneColor};overflow:hidden;`
+}
+
+function getOverlayStyle(raw: AnyBone, color: string, dark: boolean, anim: 'pulse' | 'shimmer' | 'solid') {
+  if (anim === 'solid') return ''
+  const bone = normalizeBone(raw)
+  const lighterColor = adjustColor(color, dark ? 0.04 : 0.3)
+  if (anim === 'pulse') {
+    return `position:absolute;inset:0;background-color:${lighterColor};animation:bp-${uid} 1.8s ease-in-out infinite;`
+  }
+  if (anim === 'shimmer') {
+    return `position:absolute;inset:0;background:linear-gradient(90deg, transparent 30%, ${lighterColor} 50%, transparent 70%);background-size:200% 100%;animation:bs-${uid} 2.4s linear infinite;`
+  }
+  return ''
+}
+
+let resizeObserver: ResizeObserver | null = null
+let mutationObserver: MutationObserver | null = null
+let mqHandler: (() => void) | null = null
+let mq: MediaQueryList | null = null
+
+onMounted(() => {
+  updateDarkMode()
+
+  if (containerRef.value) {
+    const rect = containerRef.value.getBoundingClientRect()
+    containerWidth.value = Math.round(rect.width)
+    if (rect.height > 0) containerHeight.value = Math.round(rect.height)
+  }
+
+  mq = window.matchMedia('(prefers-color-scheme: dark)')
+  mqHandler = () => updateDarkMode()
+  mq.addEventListener('change', mqHandler)
+
+  mutationObserver = new MutationObserver(updateDarkMode)
+  mutationObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  })
+
+  resizeObserver = new ResizeObserver(entries => {
+    const rect = entries[0]?.contentRect
+    containerWidth.value = Math.round(rect?.width ?? 0)
+    if (rect && rect.height > 0) containerHeight.value = Math.round(rect.height)
+  })
+
+  if (containerRef.value) {
+    resizeObserver.observe(containerRef.value)
+  }
+})
+
+onUnmounted(() => {
+  if (mq && mqHandler) mq.removeEventListener('change', mqHandler)
+  mutationObserver?.disconnect()
+  resizeObserver?.disconnect()
+})
+</script>
+
+<template>
+  <!-- Build mode: render fixture or children for CLI capture -->
+  <div
+    v-if="buildMode"
+    ref="containerRef"
+    :class="props.class"
+    style="position:relative;"
+    :data-boneyard="name"
+    :data-boneyard-config="serializedSnapshotConfig"
+  >
+    <div>
+      <slot name="fixture">
+        <slot />
+      </slot>
+    </div>
+  </div>
+
+  <!-- Runtime mode -->
+  <div
+    v-else
+    ref="containerRef"
+    :class="props.class"
+    style="position:relative;"
+    :data-boneyard="name"
+    :data-boneyard-config="serializedSnapshotConfig"
+  >
+    <div data-boneyard-content="true" :style="{ visibility: showSkeleton ? 'hidden' : undefined }">
+      <template v-if="showFallback">
+        <slot name="fallback" />
+      </template>
+      <template v-else>
+        <slot />
+      </template>
+    </div>
+
+    <div
+      v-if="showSkeleton && activeBones"
+      data-boneyard-overlay="true"
+      style="position:absolute;inset:0;overflow:hidden;"
+    >
+      <div style="position:relative;width:100%;height:100%;">
+        <div
+          v-for="(bone, i) in activeBones.bones"
+          :key="`${i}-${(bone as any).x ?? (bone as any)[0]}`"
+          data-boneyard-bone="true"
+          :style="getBoneStyle(bone, scaleY, resolvedColor, isDark)"
+        >
+          <div
+            v-if="animationStyle !== 'solid'"
+            :style="getOverlayStyle(bone, resolvedColor, isDark, animationStyle)"
+          />
+        </div>
+
+        <component v-if="animationStyle === 'pulse'" :is="'style'">
+          @keyframes bp-{{ uid }}{0%,100%{opacity:0}50%{opacity:1}}
+        </component>
+        <component v-if="animationStyle === 'shimmer'" :is="'style'">
+          @keyframes bs-{{ uid }}{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        </component>
+      </div>
+    </div>
+  </div>
+</template>

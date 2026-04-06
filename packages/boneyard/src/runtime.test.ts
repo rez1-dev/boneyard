@@ -79,6 +79,53 @@ describe('renderBones', () => {
     const matches = renderBones(skel).match(/class="boneyard-bone" style=/g)
     expect(matches).toHaveLength(50)
   })
+
+  it('renders compact tuple bones', () => {
+    const skel: SkeletonResult = {
+      name: 'compact', viewportWidth: 400, width: 400, height: 200,
+      bones: [[10, 20, 80, 40, 8] as any, [0, 0, 100, 200, 12, true] as any],
+    }
+    const html = renderBones(skel)
+    expect(html).toContain('left:10%')
+    expect(html).toContain('left:0%')
+    expect(html).toContain('height:40px')
+  })
+
+  it('renders container bones with lighter color', () => {
+    const skel: SkeletonResult = {
+      name: 'container', viewportWidth: 300, width: 300, height: 100,
+      bones: [
+        { x: 0, y: 0, w: 100, h: 100, r: 8, c: true },
+        { x: 10, y: 10, w: 80, h: 20, r: 4 },
+      ],
+    }
+    const html = renderBones(skel, '#333333', false)
+    // Both bones should render with different colors
+    const boneElements = html.match(/boneyard-bone[^<]+background-color:(#[a-f0-9]+)/g)
+    expect(boneElements).not.toBeNull()
+    expect(boneElements!.length).toBe(2)
+    // Container bone color should differ from regular bone color
+    expect(boneElements![0]).not.toBe(boneElements![1])
+  })
+
+  it('renders asymmetric border radius string', () => {
+    const skel: SkeletonResult = {
+      name: 'asym', viewportWidth: 100, width: 100, height: 50,
+      bones: [{ x: 0, y: 0, w: 100, h: 50, r: '8px 8px 0px 0px' }],
+    }
+    expect(renderBones(skel)).toContain('border-radius:8px 8px 0px 0px')
+  })
+
+  it('renders with zero-height skeleton', () => {
+    const skel: SkeletonResult = {
+      name: 'zero', viewportWidth: 100, width: 100, height: 0,
+      bones: [],
+    }
+    const html = renderBones(skel)
+    expect(html).toContain('height:0px')
+    // No bone divs should be rendered
+    expect(html).not.toContain('class="boneyard-bone" style=')
+  })
 })
 
 // ── computeLayout with SkeletonDescriptor ──

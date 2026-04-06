@@ -23,6 +23,11 @@
       "svelte": "./dist/Skeleton.svelte",
       "default": "./dist/Skeleton.svelte"
     },
+    "./vue": {
+      "types": "./dist/vue.d.ts",
+      "import": "./dist/Skeleton.vue",
+      "default": "./dist/Skeleton.vue"
+    },
     "./react-native": {
       "types": "./dist/native.d.ts",
       "default": "./dist/native.tsx"
@@ -49,6 +54,9 @@
       ],
       "svelte": [
         "./dist/svelte.d.ts"
+      ],
+      "vue": [
+        "./dist/vue.d.ts"
       ]
     }
   },
@@ -66,9 +74,10 @@
     "native-scan.d.ts"
   ],
   "scripts": {
-    "build": "tsc && npm run copy-svelte && npm run copy-native",
+    "build": "tsc && npm run copy-svelte && npm run copy-native && npm run copy-vue",
     "copy-svelte": "cp src/Skeleton.svelte dist/Skeleton.svelte && cp src/svelte.d.ts dist/svelte.d.ts",
     "copy-native": "cp src/native.tsx dist/native.tsx && cp src/react-native.tsx dist/react-native.tsx && cp src/native-scan.tsx dist/native-scan.tsx",
+    "copy-vue": "cp src/Skeleton.vue dist/Skeleton.vue && cp src/vue.d.ts dist/vue.d.ts",
     "benchmark": "bun run scripts/benchmark-layout.ts",
     "test": "bun test",
     "prepublishOnly": "npm run build"
@@ -80,6 +89,7 @@
     "placeholder",
     "react",
     "react-native",
+    "vue",
     "zero-layout-shift"
   ],
   "license": "MIT",
@@ -94,7 +104,8 @@
   "peerDependencies": {
     "react": ">=18",
     "svelte": ">=5",
-    "react-native": ">=0.71"
+    "react-native": ">=0.71",
+    "vue": ">=3"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -104,6 +115,9 @@
       "optional": true
     },
     "react-native": {
+      "optional": true
+    },
+    "vue": {
       "optional": true
     }
   },
