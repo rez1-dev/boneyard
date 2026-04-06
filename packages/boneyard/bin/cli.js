@@ -25,6 +25,22 @@ import { resolve, join, dirname } from 'path'
 import http from 'http'
 import https from 'https'
 
+function loadEnvFile(filePath) {
+  if (!existsSync(filePath)) return
+  const lines = readFileSync(filePath, 'utf-8').split('\n')
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const eqIdx = trimmed.indexOf('=')
+    if (eqIdx < 0) continue
+    const key = trimmed.slice(0, eqIdx).trim()
+    const raw = trimmed.slice(eqIdx + 1).trim()
+    if (key && !(key in process.env)) {
+      process.env[key] = raw.replace(/^(['"])(.*)\1$/, '$2')
+    }
+  }
+}
+
 const args = process.argv.slice(2)
 const command = args[0]
 
@@ -50,6 +66,7 @@ let cliSetBreakpoints = false
 let cliSetWait = false
 let forceRebuild = false
 let nativeMode = false
+let envFilePath = null
 
 for (let i = 1; i < args.length; i++) {
   if (args[i] === '--out') {
@@ -65,6 +82,8 @@ for (let i = 1; i < args.length; i++) {
     forceRebuild = true
   } else if (args[i] === '--native') {
     nativeMode = true
+  } else if (args[i] === '--env-file') {
+    envFilePath = args[++i]
   } else if (!args[i].startsWith('--')) {
     urls.push(args[i])
   }
@@ -97,6 +116,14 @@ if (!cliSetWait && typeof config.wait === 'number') {
 // Resolve env vars in auth config
 const allowedCookieKeys = new Set(['name', 'value', 'path', 'domain', 'expires', 'httpOnly', 'secure', 'sameSite'])
 const blockedHeaders = new Set(['host', 'content-length', 'transfer-encoding', 'connection', 'upgrade'])
+
+const resolvedEnvFile = envFilePath
+  ? resolve(process.cwd(), envFilePath)
+  : existsSync(resolve(process.cwd(), '.env.local'))
+    ? resolve(process.cwd(), '.env.local')
+    : resolve(process.cwd(), '.env')
+
+loadEnvFile(resolvedEnvFile)
 
 if (config.resolveEnvVars && config.auth) {
   if (config.auth.cookies) {
@@ -877,6 +904,7 @@ function printHelp() {
     --out <dir>          Output directory             (default: ./src/bones)
     --breakpoints <bp>   Comma-separated px widths    (default: 375,768,1280)
     --wait <ms>          Extra wait after page load   (default: 800)
+    --env-file <path>    Load env vars from file      (default: .env.local → .env)
     --force              Recapture all skeletons      (skip incremental cache)
     --native             React Native mode — captures bones from a running
                          native app on device/simulator (no browser needed).
@@ -905,6 +933,7 @@ function printHelp() {
     Use env[VAR_NAME] syntax to reference environment variables.
     Set resolveEnvVars: true to enable env var resolution.
     Note: env var resolution is only supported for auth config (cookies and headers).
+    Or use --env-file .env.local if vars aren't in your shell environment. (or if you are using bun)
 
   Examples:
     npx boneyard-js build
