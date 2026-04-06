@@ -1,135 +1,156 @@
 import { CodeBlock } from "@/components/ui/code-block";
+import { TableOfContents } from "@/components/toc";
 
-function PropItem({
-  name,
-  type,
-  defaultValue,
-  required,
-  children,
-}: {
-  name: string;
-  type: string;
-  defaultValue?: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="py-4 first:pt-0 last:pb-0">
-      <div className="flex items-baseline gap-2 flex-wrap mb-1">
-        <code className="font-[family-name:var(--font-mono)] text-[13px] font-semibold text-[#1c1917]">{name}</code>
-        <code className="text-[11px] text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded">{type}</code>
-        {required && <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">required</span>}
-        {defaultValue && (
-          <span className="text-[11px] text-stone-400">
-            default: <code className="text-[11px] bg-stone-100 px-1 py-0.5 rounded">{defaultValue}</code>
-          </span>
-        )}
-      </div>
-      <div className="text-[13px] text-[#78716c] leading-relaxed">{children}</div>
-    </div>
-  );
-}
+const tocItems = [
+  { id: "quick-start", label: "Quick start" },
+  { id: "skeleton-props", label: "<Skeleton> props" },
+  { id: "hiding-elements", label: "Hiding elements" },
+  { id: "build-command", label: "Build command" },
+  { id: "config-file", label: "Config file" },
+];
 
 export default function FeaturesPage() {
   return (
+    <div className="flex gap-10">
     <div className="max-w-[720px] px-6 pt-14 pb-12 space-y-12">
       {/* Header */}
       <div>
-        <h1 className="text-[28px] font-bold tracking-tight mb-2">API Reference</h1>
+        <h1 className="text-[28px] font-bold tracking-tight mb-2">React</h1>
         <p className="text-[15px] text-[#78716c] leading-relaxed">
-          Everything you can pass to <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">&lt;Skeleton&gt;</code> and the build CLI.
+          Use boneyard in Next.js, Vite, Remix, or any React app. Wrap your components, run the CLI, and get pixel-perfect skeleton screens.
         </p>
       </div>
 
-      {/* ── <Skeleton> props ── */}
+      {/* Quick start */}
       <section>
-        <div className="section-divider">
-          <span><code className="font-[family-name:var(--font-mono)] text-[13px]">&lt;Skeleton&gt;</code> props</span>
+        <div className="section-divider" id="quick-start">
+          <span>Quick start</span>
         </div>
-
-        <div className="mt-4 divide-y divide-stone-100">
-          <PropItem name="loading" type="boolean" required>
-            When <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">true</code>, shows the skeleton.
-            When <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">false</code>, shows your real content.
-          </PropItem>
-
-          <PropItem name="children" type="ReactNode" required>
-            Your actual component. This is what boneyard reads to figure out where to put the skeleton rectangles.
-          </PropItem>
-
-          <PropItem name="name" type="string" required>
-            A unique name for this skeleton. The build CLI uses this to create the <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> file.
-            <br />
-            Example: <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">name=&quot;blog-card&quot;</code> → generates <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">blog-card.bones.json</code>
-          </PropItem>
-
-          <PropItem name="initialBones" type="ResponsiveBones">
-            <p>Optional manual override — pass a bones JSON file directly to a specific Skeleton. If you use the registry (<code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">import &apos;./bones/registry&apos;</code> in your app entry), you don&apos;t need this prop. The registry auto-resolves bones by name.</p>
-            <div className="mt-2 rounded-lg bg-[#1a1a1a] p-3 font-mono text-[12px]">
-              <span className="text-stone-500">{"// Only needed if you're NOT using the registry"}</span>{"\n"}
-              <span className="text-[#c084fc]">import</span><span className="text-stone-300"> blogBones </span><span className="text-[#c084fc]">from</span><span className="text-[#86efac]"> &apos;@/bones/blog-card.bones.json&apos;</span>
-            </div>
-          </PropItem>
-
-          <PropItem name="color" type="string" defaultValue="#e0e0e0">
-            The color of the skeleton rectangles. Any hex color works. The pulse animation automatically shimmers to a lighter version of whatever color you set.
-          </PropItem>
-
-          <PropItem name="animate" type={`"pulse" | "shimmer" | "solid"`} defaultValue="pulse">
-            Animation style. <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">pulse</code> fades in and out, <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">shimmer</code> sweeps a gradient, <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">solid</code> is static. Also accepts <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">true</code>/<code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">false</code>.
-          </PropItem>
-
-          <PropItem name="className" type="string">
-            An extra CSS class on the wrapper div. Use it if you need to add margins, padding, etc.
-          </PropItem>
-
-          <PropItem name="fallback" type="ReactNode">
-            What to show if you haven&apos;t generated bones yet. You probably don&apos;t need this — just run the build command.
-          </PropItem>
-
-          <PropItem name="fixture" type="ReactNode">
-            <p>Mock content rendered during <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">npx boneyard-js build</code> so the CLI can capture bone positions even when real data isn&apos;t available (e.g., behind authentication, user-specific data, or API-dependent content).</p>
-            <p className="mt-2">Only rendered when the CLI is running — never used in production.</p>
-            <div className="mt-2 rounded-lg bg-[#1a1a1a] p-3 font-mono text-[12px]">
-              <span className="text-[#93c5fd]">fixture</span><span className="text-stone-300">={`{`}</span>{"\n"}
-              <span className="text-stone-300">{"  "}&lt;</span><span className="text-[#fde68a]">BlogCard</span><span className="text-stone-300">{" "}data={`{`}{`{`}</span>{"\n"}
-              <span className="text-stone-300">{"    "}</span><span className="text-[#93c5fd]">title</span><span className="text-stone-300">: </span><span className="text-[#86efac]">&quot;Sample Post Title&quot;</span><span className="text-stone-300">,</span>{"\n"}
-              <span className="text-stone-300">{"    "}</span><span className="text-[#93c5fd]">excerpt</span><span className="text-stone-300">: </span><span className="text-[#86efac]">&quot;Placeholder text for layout capture...&quot;</span>{"\n"}
-              <span className="text-stone-300">{"  "}{`}`}{`}`} /&gt;</span>{"\n"}
-              <span className="text-stone-300">{`}`}</span>
-            </div>
-          </PropItem>
-
-          <PropItem name="snapshotConfig" type="SnapshotConfig">
-            Controls how the build CLI extracts bones. See the &quot;Hiding elements&quot; section below for details.
-          </PropItem>
-        </div>
-
-        {/* Example */}
-        <div className="mt-8">
-          <p className="text-[13px] font-semibold text-stone-700 mb-3">Full example</p>
-          <CodeBlock filename="app/blog/page.tsx" language="tsx" code={`<span class="text-stone-500">// Registry auto-resolves bones — no per-file JSON import needed</span>
-<span class="text-[#c084fc]">import</span> { Skeleton } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'boneyard-js/react'</span>
+        <div className="mt-4 space-y-4">
+          <div>
+            <p className="text-[13px] font-medium text-stone-500 mb-2">1. Install</p>
+            <CodeBlock language="bash" code="npm install boneyard-js" />
+          </div>
+          <div>
+            <p className="text-[13px] font-medium text-stone-500 mb-2">2. Wrap your components</p>
+            <CodeBlock language="tsx" code={`<span class="text-[#c084fc]">import</span> { Skeleton } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'boneyard-js/react'</span>
 
 <span class="text-[#c084fc]">function</span> <span class="text-[#fde68a]">BlogPage</span>() {
   <span class="text-[#c084fc]">const</span> { data, isLoading } = <span class="text-[#fde68a]">useFetch</span>(<span class="text-[#86efac]">'/api/post'</span>)
-
   <span class="text-[#c084fc]">return</span> (
-    &lt;<span class="text-[#fde68a]">Skeleton</span>
-      <span class="text-[#93c5fd]">name</span>=<span class="text-[#86efac]">"blog-card"</span>
-      <span class="text-[#93c5fd]">loading</span>={isLoading}
-      <span class="text-[#93c5fd]">color</span>=<span class="text-[#86efac]">"#d4d4d4"</span>
-    &gt;
-      {data &amp;&amp; &lt;<span class="text-[#fde68a]">BlogCard</span> data={data} /&gt;}
+    &lt;<span class="text-[#fde68a]">Skeleton</span> <span class="text-[#93c5fd]">name</span>=<span class="text-[#86efac]">"blog-card"</span> <span class="text-[#93c5fd]">loading</span>={isLoading}&gt;
+      &lt;<span class="text-[#fde68a]">BlogCard</span> data={data} /&gt;
     &lt;/<span class="text-[#fde68a]">Skeleton</span>&gt;
   )
 }`} />
+          </div>
+          <div>
+            <p className="text-[13px] font-medium text-stone-500 mb-2">3. Generate bones</p>
+            <CodeBlock language="bash" code="npx boneyard-js build" />
+            <p className="text-[13px] text-stone-400 mt-2">
+              Auto-detects your dev server and captures all named skeletons at multiple breakpoints.
+            </p>
+          </div>
+          <div>
+            <p className="text-[13px] font-medium text-stone-500 mb-2">4. Import the registry</p>
+            <CodeBlock language="tsx" code={`<span class="text-stone-500">// Add once in your app entry (e.g. layout.tsx, _app.tsx, main.tsx)</span>
+<span class="text-[#c084fc]">import</span> <span class="text-[#86efac]">'./bones/registry'</span>`} />
+          </div>
+        </div>
+      </section>
+
+      {/* ── <Skeleton> props ── */}
+      <section>
+        <div className="section-divider" id="skeleton-props">
+          <span>Props</span>
+        </div>
+        <div className="mt-4 rounded-lg border border-stone-200 overflow-hidden">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="bg-stone-50 border-b border-stone-200">
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Prop</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Type</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Default</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Description</th>
+              </tr>
+            </thead>
+            <tbody className="text-[#78716c]">
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">loading</td>
+                <td className="px-4 py-2">boolean</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Show skeleton or children</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">name</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Unique name — generates <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">name.bones.json</code></td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">initialBones</td>
+                <td className="px-4 py-2">ResponsiveBones</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Pass bones directly (overrides registry)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">color</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">rgba(0,0,0,0.08)</td>
+                <td className="px-4 py-2">Bone color in light mode</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">darkColor</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">rgba(255,255,255,0.06)</td>
+                <td className="px-4 py-2">Bone color in dark mode</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">animate</td>
+                <td className="px-4 py-2">{`'pulse' | 'shimmer' | 'solid'`}</td>
+                <td className="px-4 py-2">pulse</td>
+                <td className="px-4 py-2">Animation style (also accepts true/false)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">className</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Extra CSS class on the wrapper</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">fallback</td>
+                <td className="px-4 py-2">ReactNode</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Shown when loading but no bones available</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">fixture</td>
+                <td className="px-4 py-2">ReactNode</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Mock content for CLI capture (dev only)</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 font-mono text-stone-800">snapshotConfig</td>
+                <td className="px-4 py-2">SnapshotConfig</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Controls bone extraction (see Hiding elements)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6 rounded-lg border border-stone-200 bg-stone-50 p-4">
+          <p className="text-[13px] font-medium text-stone-700 mb-2">fixture prop</p>
+          <p className="text-[13px] text-[#78716c]">
+            Use <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">fixture</code> to provide mock content for the CLI when real data isn&apos;t available
+            (auth-protected pages, user-specific data, API-dependent content). Only rendered during <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">npx boneyard-js build</code> — never in production.
+          </p>
         </div>
       </section>
 
       {/* ── Excluding elements ── */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="hiding-elements">
           <span>Hiding elements from the skeleton</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
@@ -205,7 +226,7 @@ export default function FeaturesPage() {
 
       {/* ── CLI ── */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="build-command">
           <span>Build command</span>
         </div>
 
@@ -220,26 +241,48 @@ export default function FeaturesPage() {
           measures the layout at different screen sizes, and saves the result as JSON files you can import.
         </p>
 
-        <div className="mt-4 divide-y divide-stone-100">
-          <PropItem name="url" type="positional" defaultValue="auto-detected">
-            The URL(s) to visit. If you don&apos;t pass one, it scans common dev ports (3000, 5173, 4321, 8080…) and uses the first one that responds.
-          </PropItem>
-
-          <PropItem name="--breakpoints" type="string" defaultValue="375,768,1280">
-            Screen widths to capture at, comma-separated. The defaults cover mobile, tablet, and desktop.
-          </PropItem>
-
-          <PropItem name="--wait" type="number" defaultValue="800">
-            How long to wait (in ms) after the page loads before capturing. Increase this if your components take a while to render.
-          </PropItem>
-
-          <PropItem name="--out" type="string" defaultValue="./src/bones">
-            Where to save the JSON files. Defaults to <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">src/bones/</code> if you have a <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">src/</code> folder, otherwise <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">./bones/</code>.
-          </PropItem>
-
-          <PropItem name="--force" type="flag">
-            Recapture all skeletons, ignoring the incremental cache. Use this if bones look wrong or after upgrading boneyard.
-          </PropItem>
+        <div className="mt-4 rounded-lg border border-stone-200 overflow-hidden">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="bg-stone-50 border-b border-stone-200">
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Flag</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Default</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Description</th>
+              </tr>
+            </thead>
+            <tbody className="text-[#78716c]">
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">[url]</td>
+                <td className="px-4 py-2">auto-detected</td>
+                <td className="px-4 py-2">URL to visit (scans ports 3000, 5173, 8080... if omitted)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">--breakpoints</td>
+                <td className="px-4 py-2">375,768,1280</td>
+                <td className="px-4 py-2">Viewport widths to capture, comma-separated</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">--wait</td>
+                <td className="px-4 py-2">800</td>
+                <td className="px-4 py-2">ms to wait after page load before capturing</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">--out</td>
+                <td className="px-4 py-2">./src/bones</td>
+                <td className="px-4 py-2">Output directory for .bones.json files</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">--force</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Skip incremental cache, recapture all</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 font-mono text-stone-800">--native</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">React Native mode (see <a href="/react-native" className="text-stone-800 underline underline-offset-2">React Native docs</a>)</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div className="mt-6">
@@ -277,7 +320,7 @@ npx boneyard-js build --force`} />
 
       {/* ── Config file ── */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="config-file">
           <span>Config file</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
@@ -305,32 +348,63 @@ npx boneyard-js build --force`} />
           Runtime defaults are automatically included in the generated{" "}
           <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">registry.js</code> — no extra imports or function calls needed.
         </p>
-        <div className="mt-4 divide-y divide-stone-100">
-          <PropItem name="breakpoints" type="number[]" defaultValue="auto-detected">
-            Viewport widths to capture at. If omitted, Tailwind breakpoints are auto-detected (375, 640, 768, 1024, 1280, 1536). Falls back to 375, 768, 1280 without Tailwind.
-          </PropItem>
-          <PropItem name="out" type="string" defaultValue="./src/bones">
-            Output directory for <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> files and the generated registry.
-          </PropItem>
-          <PropItem name="wait" type="number" defaultValue="800">
-            Milliseconds to wait after page load before capturing.
-          </PropItem>
-          <PropItem name="color" type="string" defaultValue="rgba(0,0,0,0.08)">
-            Default bone color for light mode.
-          </PropItem>
-          <PropItem name="darkColor" type="string" defaultValue="rgba(255,255,255,0.06)">
-            Default bone color for dark mode.
-          </PropItem>
-          <PropItem name="animate" type={`"pulse" | "shimmer" | "solid"`} defaultValue="pulse">
-            Default animation style for all skeletons.
-          </PropItem>
+        <div className="mt-4 rounded-lg border border-stone-200 overflow-hidden">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="bg-stone-50 border-b border-stone-200">
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Key</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Type</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Default</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Description</th>
+              </tr>
+            </thead>
+            <tbody className="text-[#78716c]">
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">breakpoints</td>
+                <td className="px-4 py-2">number[]</td>
+                <td className="px-4 py-2">auto</td>
+                <td className="px-4 py-2">Viewport widths (auto-detects Tailwind)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">out</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">./src/bones</td>
+                <td className="px-4 py-2">Output directory</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">wait</td>
+                <td className="px-4 py-2">number</td>
+                <td className="px-4 py-2">800</td>
+                <td className="px-4 py-2">ms to wait after page load</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">color</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">rgba(0,0,0,0.08)</td>
+                <td className="px-4 py-2">Default bone color (light mode)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">darkColor</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">rgba(255,255,255,0.06)</td>
+                <td className="px-4 py-2">Default bone color (dark mode)</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 font-mono text-stone-800">animate</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">pulse</td>
+                <td className="px-4 py-2">Default animation (pulse, shimmer, solid)</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div className="border-l-2 border-stone-300 pl-4 py-1 mt-4">
-          <p className="text-[13px] text-[#78716c]">
-            Priority: per-component prop → global defaults → built-in defaults.
-          </p>
-        </div>
+        <p className="text-[13px] text-stone-400 mt-3">
+          Priority: per-component prop &rarr; config file &rarr; built-in defaults.
+        </p>
       </section>
+    </div>
+
+    <TableOfContents items={tocItems} />
     </div>
   );
 }

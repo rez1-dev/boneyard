@@ -1,69 +1,42 @@
 import { CodeBlock } from "@/components/ui/code-block";
+import { TableOfContents } from "@/components/toc";
+
+const tocItems = [
+  { id: "quick-start", label: "Quick start" },
+  { id: "how-scanning-works", label: "How scanning works" },
+  { id: "other-ways", label: "Other ways to generate" },
+  { id: "props", label: "Props" },
+  { id: "dark-mode", label: "Dark mode" },
+  { id: "auth", label: "Auth-protected screens" },
+  { id: "expo-metro", label: "Expo & Metro setup" },
+  { id: "project-structure", label: "Project structure" },
+  { id: "differences", label: "Differences from web" },
+];
 
 export default function ReactNativePage() {
   return (
+    <div className="flex gap-10">
     <div className="max-w-[720px] px-6 pt-14 pb-12 space-y-12">
       <div>
         <h1 className="text-[28px] font-bold tracking-tight mb-2">React Native</h1>
         <p className="text-[15px] text-[#78716c] leading-relaxed">
-          Use boneyard in React Native and Expo apps. Same pixel-perfect skeletons, same pre-generated bones — just a different renderer.
+          Use boneyard in React Native and Expo apps. Same pixel-perfect skeletons, same bone format — native renderer with built-in device scanning.
         </p>
       </div>
 
-      {/* Step 1 — Install */}
+      {/* Quick start */}
       <section>
-        <div className="section-divider">
-          <span>1. Install</span>
+        <div className="section-divider" id="quick-start">
+          <span>Quick start</span>
         </div>
-        <div className="mt-4">
-          <CodeBlock language="bash" code="npm install boneyard-js" />
-        </div>
-        <p className="text-[13px] text-stone-400 mt-2">
-          Same package — React Native support is built in. No extra dependencies needed.
-        </p>
-      </section>
-
-      {/* Step 2 — Import */}
-      <section>
-        <div className="section-divider">
-          <span>2. Import the native component</span>
-        </div>
-        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          Import <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">Skeleton</code> and <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">registerBones</code> from
-          the <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/native</code> entry point instead of <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/react</code>.
-        </p>
-        <CodeBlock language="tsx" code={`<span class="text-[#c084fc]">import</span> { Skeleton } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'boneyard-js/native'</span>
-<span class="text-[#c084fc]">import</span> { registerBones } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'boneyard-js/native'</span>`} />
-
-        <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 space-y-2">
-          <p className="text-[13px] font-medium text-stone-700">Why a separate entry point?</p>
-          <p className="text-[13px] text-[#78716c]">
-            The native renderer uses React Native&apos;s <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">View</code>, <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">Animated</code>,
-            and <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">StyleSheet</code> APIs
-            instead of HTML divs and CSS keyframes. The bone data format is identical — only the rendering layer is different.
-          </p>
-        </div>
-      </section>
-
-      {/* Step 3 — Generate bones */}
-      <section>
-        <div className="section-divider">
-          <span>3. Generate or create bones</span>
-        </div>
-        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          Three ways to get bone data into your React Native app:
-        </p>
-
-        <div className="space-y-6">
+        <div className="mt-4 space-y-4">
           <div>
-            <p className="text-[13px] font-medium text-stone-700 mb-2">Option A: Scan from your running app (recommended)</p>
-            <p className="text-[14px] text-[#78716c] leading-relaxed mb-3">
-              The same <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">{'<Skeleton>'}</code> component you
-              use in production auto-scans in dev mode — no extra wrappers needed. Just run the CLI
-              with <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">--native</code> and open your app.
-            </p>
-            <CodeBlock language="tsx" code={`<span class="text-stone-500">// Same component you use in production — nothing extra to add</span>
-<span class="text-[#c084fc]">import</span> { Skeleton } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'boneyard-js/native'</span>
+            <p className="text-[13px] font-medium text-stone-500 mb-2">1. Install</p>
+            <CodeBlock language="bash" code="npm install boneyard-js" />
+          </div>
+          <div>
+            <p className="text-[13px] font-medium text-stone-500 mb-2">2. Wrap your components</p>
+            <CodeBlock language="tsx" code={`<span class="text-[#c084fc]">import</span> { Skeleton } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'boneyard-js/native'</span>
 
 <span class="text-[#c084fc]">function</span> <span class="text-[#fde68a]">ProfileScreen</span>() {
   <span class="text-[#c084fc]">const</span> [loading, setLoading] = <span class="text-[#fde68a]">useState</span>(<span class="text-[#fbbf24]">true</span>)
@@ -73,177 +46,124 @@ export default function ReactNativePage() {
     &lt;/<span class="text-[#fde68a]">Skeleton</span>&gt;
   )
 }`} />
-            <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-3">
-              Then run the CLI and open your app:
+          </div>
+          <div>
+            <p className="text-[13px] font-medium text-stone-500 mb-2">3. Generate bones</p>
+            <CodeBlock language="bash" code={`npx boneyard-js build --native --out ./bones`} />
+            <p className="text-[13px] text-stone-400 mt-2">
+              Then open your app on device or simulator. Bones are captured automatically.
             </p>
-            <CodeBlock language="bash" code={`<span class="text-stone-500"># Start the bone capture listener</span>
-npx boneyard-js build --native --out ./bones
+          </div>
+          <div>
+            <p className="text-[13px] font-medium text-stone-500 mb-2">4. Import the registry and reload</p>
+            <CodeBlock language="tsx" code={`<span class="text-stone-500">// Add once in your app entry (e.g. App.tsx)</span>
+<span class="text-[#c084fc]">import</span> <span class="text-[#86efac]">'./bones/registry'</span>`} />
+            <p className="text-[13px] text-stone-400 mt-2">
+              Reload your app after adding the import — the skeletons will render on the next launch.
+            </p>
+          </div>
+        </div>
+      </section>
 
-<span class="text-stone-500"># Open your app on device or simulator</span>
-<span class="text-stone-500"># Bones are captured automatically — press Ctrl+C when done</span>`} />
-            <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-3">
-              The CLI writes <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> files and
-              a <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">registry.js</code> that imports
-              from <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/native</code> automatically.
+      {/* How scanning works */}
+      <section>
+        <div className="section-divider" id="how-scanning-works">
+          <span>How native scanning works</span>
+        </div>
+        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
+          On web, the CLI opens a headless browser and snapshots the DOM. On React Native, the <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">{'<Skeleton>'}</code> component
+          itself does the scanning — no browser needed.
+        </p>
+        <div className="rounded-lg border border-stone-200 bg-[#1a1a1a] p-5 font-mono text-[13px] leading-[1.8] overflow-x-auto">
+          <div className="text-stone-500"># Terminal — start the capture listener</div>
+          <div className="text-[#86efac]">npx boneyard-js build --native --out ./bones</div>
+          <div className="text-stone-600 mt-2"># Open your app on device or simulator</div>
+          <div className="text-stone-600"># Bones appear in the CLI as they&apos;re captured</div>
+          <div className="text-stone-600"># Press Ctrl+C when done</div>
+        </div>
+        <div className="mt-4 space-y-3">
+          <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
+            <p className="text-[13px] font-medium text-stone-700 mb-2">What happens under the hood</p>
+            <ol className="text-[13px] text-[#78716c] space-y-1.5 list-decimal pl-4">
+              <li>The CLI starts a listener on port 9999 and waits for bone data.</li>
+              <li>In dev mode, every <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">{'<Skeleton name="...">'}</code> checks if the CLI is listening.</li>
+              <li>If found, it walks the React fiber tree, measures each native view&apos;s position with <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">UIManager.measureLayout</code>, and sends the results.</li>
+              <li>The CLI writes <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">.bones.json</code> files + a <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">registry.js</code> that imports from <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">boneyard-js/native</code>.</li>
+            </ol>
+            <p className="text-[13px] text-[#78716c] mt-3">
+              Scanning happens once per named skeleton, 800ms after mount. In production builds (<code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">__DEV__ === false</code>) the scan code is completely inactive — zero overhead.
             </p>
-            <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 space-y-2">
-              <p className="text-[13px] font-medium text-stone-700">How it works</p>
-              <p className="text-[13px] text-[#78716c]">
-                In dev mode, every <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">{'<Skeleton name="...">'}</code> checks
-                if the CLI is listening on port 9999. If it is, the component walks the React fiber tree,
-                measures each native view&apos;s position, and sends the bone data to the CLI. This happens once
-                per named skeleton, 800ms after mount. In production builds this code is completely inactive.
-              </p>
-            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="text-[13px] font-medium text-amber-800 mb-1">Reload after generating bones</p>
+          <p className="text-[13px] text-amber-700">
+            After running <code className="text-[12px] bg-amber-100 px-1 py-0.5 rounded">build --native</code>, you need to reload your app for the new bone data to take effect.
+            The registry is imported at startup — a hot reload won&apos;t pick up new <code className="text-[12px] bg-amber-100 px-1 py-0.5 rounded">.bones.json</code> files.
+            Shake your device and tap &quot;Reload&quot;, or press <code className="text-[12px] bg-amber-100 px-1 py-0.5 rounded">r</code> in the Expo terminal.
+          </p>
+        </div>
+      </section>
+
+      {/* Other ways to get bones */}
+      <section>
+        <div className="section-divider" id="other-ways">
+          <span>Other ways to generate bones</span>
+        </div>
+        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
+          The <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">--native</code> flag is the easiest way. But if you need alternatives:
+        </p>
+
+        <div className="space-y-6">
+          <div>
+            <p className="text-[13px] font-medium text-stone-700 mb-2">Expo web</p>
+            <p className="text-[14px] text-[#78716c] leading-relaxed mb-3">
+              If your app supports Expo web, you can use the standard web CLI. Create a capture page with the <strong className="text-stone-600">web</strong> Skeleton,
+              run <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">npx expo start --web</code>, then <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">npx boneyard-js build http://localhost:8081 --native</code>.
+              The <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">--native</code> flag ensures the registry imports from <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/native</code>.
+            </p>
           </div>
 
           <div>
-            <p className="text-[13px] font-medium text-stone-700 mb-2">Option B: Generate from Expo web</p>
+            <p className="text-[13px] font-medium text-stone-700 mb-2">Copy from a web project</p>
             <p className="text-[14px] text-[#78716c] leading-relaxed mb-3">
-              Expo apps support <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">--web</code> mode, which renders your React Native components in a browser
-              via react-native-web. The boneyard CLI can snapshot those rendered components and generate <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> files
-              that work on native devices.
-            </p>
-            <p className="text-[14px] text-[#78716c] leading-relaxed mb-3">
-              First, create a capture page that wraps your components with the <strong className="text-stone-600">web</strong> Skeleton
-              (from <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/react</code>). This page is only used for the CLI build — not in your native app:
-            </p>
-            <CodeBlock filename="CaptureScreen.tsx" language="tsx" code={`<span class="text-[#c084fc]">import</span> { View } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'react-native'</span>
-<span class="text-[#c084fc]">import</span> { Skeleton } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'boneyard-js/react'</span>
-<span class="text-[#c084fc]">import</span> { ProfileCard } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'./components/ProfileCard'</span>
-
-<span class="text-[#c084fc]">export default function</span> <span class="text-[#fde68a]">CaptureScreen</span>() {
-  <span class="text-[#c084fc]">return</span> (
-    &lt;<span class="text-[#fde68a]">View</span>&gt;
-      &lt;<span class="text-[#fde68a]">Skeleton</span> <span class="text-[#93c5fd]">name</span>=<span class="text-[#86efac]">"profile-card"</span> <span class="text-[#93c5fd]">loading</span>={<span class="text-[#fbbf24]">false</span>}
-        <span class="text-[#93c5fd]">fixture</span>={&lt;<span class="text-[#fde68a]">ProfileCard</span> /&gt;}&gt;
-        &lt;<span class="text-[#fde68a]">ProfileCard</span> /&gt;
-      &lt;/<span class="text-[#fde68a]">Skeleton</span>&gt;
-    &lt;/<span class="text-[#fde68a]">View</span>&gt;
-  )
-}`} />
-            <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-3">
-              Then run Expo web and the boneyard CLI:
-            </p>
-            <CodeBlock language="bash" code={`<span class="text-stone-500"># Terminal 1 — start Expo web</span>
-npx expo start --web
-
-<span class="text-stone-500"># Terminal 2 — generate bones</span>
-npx boneyard-js build http://localhost:8081 --out ./bones`} />
-            <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-3">
-              The CLI generates <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> files and a <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">registry.js</code>.
-              The generated registry imports from <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/react</code> — change it
-              to <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/native</code> for your mobile app:
-            </p>
-            <CodeBlock filename="bones/registry.js — change this line" language="tsx" code={`<span class="text-stone-500">// Generated:</span>  <span class="text-[#c084fc]">import</span> { registerBones } <span class="text-[#c084fc]">from</span> <span class="text-stone-500 line-through">'boneyard-js/react'</span>
-<span class="text-stone-500">// Change to:</span>  <span class="text-[#c084fc]">import</span> { registerBones } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'boneyard-js/native'</span>`} />
-
-            <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 space-y-2">
-              <p className="text-[13px] font-medium text-stone-700">Tip: auto-capture with build mode</p>
-              <p className="text-[13px] text-[#78716c]">
-                The CLI sets <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">window.__BONEYARD_BUILD = true</code> when
-                visiting your app. You can conditionally render your capture page only during the build — keeping
-                your normal app UI for development and the capture layout for bone generation.
-              </p>
-            </div>
-          </div>
-
-          <div>
-            <p className="text-[13px] font-medium text-stone-700 mb-2">Option C: Copy from a web project</p>
-            <p className="text-[14px] text-[#78716c] leading-relaxed mb-3">
-              If you already have a web version of your app (Next.js, Vite, etc.) with boneyard set up,
-              just copy the <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> files.
-              The format is identical across platforms.
+              If you already have a web version with boneyard, just copy the <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> files. The format is identical across platforms.
             </p>
             <CodeBlock language="bash" code={`cp src/bones/*.bones.json ../my-rn-app/bones/`} />
           </div>
 
           <div>
-            <p className="text-[13px] font-medium text-stone-700 mb-2">Option D: Write bones by hand</p>
+            <p className="text-[13px] font-medium text-stone-700 mb-2">Write by hand</p>
             <p className="text-[14px] text-[#78716c] leading-relaxed mb-3">
-              Create a <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> file manually.
-              As of v1.6, bones are stored as compact tuples <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">[x, y, w, h, r, c?]</code> to
-              keep files small. The native renderer normalizes them at runtime, so either the tuple or the legacy
-              object form works:
+              Bones are compact tuples: <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">[x, y, w, h, r, c?]</code>.
+              <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded ml-1">x/w</code> are % of container width,
+              <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded ml-1">y/h</code> are pixels,
+              <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded ml-1">r</code> is border radius,
+              <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded ml-1">c</code> marks container bones.
             </p>
-            <CodeBlock filename="bones/profile-card.bones.json" language="json" code={`{
+            <CodeBlock filename="bones/card.bones.json" language="json" code={`{
   <span class="text-[#93c5fd]">"breakpoints"</span>: {
     <span class="text-[#93c5fd]">"375"</span>: {
-      <span class="text-[#93c5fd]">"name"</span>: <span class="text-[#86efac]">"profile-card"</span>,
+      <span class="text-[#93c5fd]">"name"</span>: <span class="text-[#86efac]">"card"</span>,
       <span class="text-[#93c5fd]">"viewportWidth"</span>: <span class="text-[#fbbf24]">375</span>,
       <span class="text-[#93c5fd]">"width"</span>: <span class="text-[#fbbf24]">343</span>,
       <span class="text-[#93c5fd]">"height"</span>: <span class="text-[#fbbf24]">200</span>,
       <span class="text-[#93c5fd]">"bones"</span>: [
         [<span class="text-[#fbbf24]">0</span>, <span class="text-[#fbbf24]">0</span>, <span class="text-[#fbbf24]">100</span>, <span class="text-[#fbbf24]">200</span>, <span class="text-[#fbbf24]">12</span>, <span class="text-[#fbbf24]">true</span>],
         [<span class="text-[#fbbf24]">4</span>, <span class="text-[#fbbf24]">16</span>, <span class="text-[#fbbf24]">18</span>, <span class="text-[#fbbf24]">64</span>, <span class="text-[#86efac]">"50%"</span>],
-        [<span class="text-[#fbbf24]">26</span>, <span class="text-[#fbbf24]">20</span>, <span class="text-[#fbbf24]">45</span>, <span class="text-[#fbbf24]">18</span>, <span class="text-[#fbbf24]">6</span>],
-        [<span class="text-[#fbbf24]">26</span>, <span class="text-[#fbbf24]">44</span>, <span class="text-[#fbbf24]">35</span>, <span class="text-[#fbbf24]">14</span>, <span class="text-[#fbbf24]">6</span>]
+        [<span class="text-[#fbbf24]">26</span>, <span class="text-[#fbbf24]">20</span>, <span class="text-[#fbbf24]">45</span>, <span class="text-[#fbbf24]">18</span>, <span class="text-[#fbbf24]">6</span>]
       ]
     }
   }
 }`} />
-            <p className="text-[13px] text-stone-400 mt-2">
-              Tuple order is <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">[x, y, w, h, r, c?]</code>.
-              <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded ml-1">x</code> and <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">w</code> are percentages of the container width.
-              <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded ml-1">y</code> and <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">h</code> are pixels.
-              <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded ml-1">r</code> is border radius (px or &quot;50%&quot; for circles).
-              The optional 6th value <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">c</code> marks a container bone (rendered lighter so child bones stand out).
-            </p>
-            <p className="text-[13px] text-stone-400 mt-2">
-              Legacy object form — <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">{"{ x, y, w, h, r, c? }"}</code> — is still accepted; the renderer normalizes both on the fly.
-            </p>
           </div>
-        </div>
-      </section>
-
-      {/* Step 4 — Register */}
-      <section>
-        <div className="section-divider">
-          <span>4. Register and use</span>
-        </div>
-        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          Create a registry file and import it once in your app entry. Then wrap components
-          with <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">&lt;Skeleton&gt;</code> — same pattern as the web version.
-        </p>
-        <CodeBlock filename="bones/registry.ts" language="tsx" code={`<span class="text-[#c084fc]">import</span> { registerBones } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'boneyard-js/native'</span>
-<span class="text-[#c084fc]">import</span> profileCard <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'./profile-card.bones.json'</span>
-<span class="text-[#c084fc]">import</span> feedItem <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'./feed-item.bones.json'</span>
-
-<span class="text-[#fde68a]">registerBones</span>({
-  <span class="text-[#86efac]">'profile-card'</span>: profileCard,
-  <span class="text-[#86efac]">'feed-item'</span>: feedItem,
-})`} />
-
-        <div className="mt-4">
-          <CodeBlock filename="App.tsx" language="tsx" code={`<span class="text-[#c084fc]">import</span> { Skeleton } <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'boneyard-js/native'</span>
-<span class="text-[#c084fc]">import</span> <span class="text-[#86efac]">'./bones/registry'</span>
-
-<span class="text-[#c084fc]">function</span> <span class="text-[#fde68a]">ProfileScreen</span>() {
-  <span class="text-[#c084fc]">const</span> [loading, setLoading] = <span class="text-[#fde68a]">useState</span>(<span class="text-[#fbbf24]">true</span>)
-
-  <span class="text-[#c084fc]">return</span> (
-    &lt;<span class="text-[#fde68a]">Skeleton</span> <span class="text-[#93c5fd]">name</span>=<span class="text-[#86efac]">"profile-card"</span> <span class="text-[#93c5fd]">loading</span>={loading}&gt;
-      &lt;<span class="text-[#fde68a]">ProfileCard</span> /&gt;
-    &lt;/<span class="text-[#fde68a]">Skeleton</span>&gt;
-  )
-}`} />
-        </div>
-
-        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4">
-          You can also pass bones directly via <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">initialBones</code> without a registry:
-        </p>
-        <div className="mt-3">
-          <CodeBlock language="tsx" code={`<span class="text-[#c084fc]">import</span> cardBones <span class="text-[#c084fc]">from</span> <span class="text-[#86efac]">'./bones/profile-card.bones.json'</span>
-
-&lt;<span class="text-[#fde68a]">Skeleton</span> <span class="text-[#93c5fd]">loading</span>={loading} <span class="text-[#93c5fd]">initialBones</span>={cardBones}&gt;
-  &lt;<span class="text-[#fde68a]">ProfileCard</span> /&gt;
-&lt;/<span class="text-[#fde68a]">Skeleton</span>&gt;`} />
         </div>
       </section>
 
       {/* Props */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="props">
           <span>Props</span>
         </div>
         <div className="mt-4 rounded-lg border border-stone-200 overflow-hidden">
@@ -267,7 +187,7 @@ npx boneyard-js build http://localhost:8081 --out ./bones`} />
                 <td className="px-4 py-2 font-mono text-stone-800">name</td>
                 <td className="px-4 py-2">string</td>
                 <td className="px-4 py-2">—</td>
-                <td className="px-4 py-2">Resolve bones from registry by name</td>
+                <td className="px-4 py-2">Resolve bones from registry by name (also used for scanning)</td>
               </tr>
               <tr className="border-b border-stone-100">
                 <td className="px-4 py-2 font-mono text-stone-800">initialBones</td>
@@ -318,12 +238,12 @@ npx boneyard-js build http://localhost:8081 --out ./bones`} />
 
       {/* Dark mode */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="dark-mode">
           <span>Dark mode</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          The skeleton auto-detects dark mode via <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">useColorScheme()</code>.
-          If your app manages its own theme, pass the <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">dark</code> prop explicitly:
+          Auto-detects via <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">useColorScheme()</code>.
+          Override with the <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">dark</code> prop if your app manages its own theme:
         </p>
         <CodeBlock language="tsx" code={`<span class="text-stone-500">// Force light mode regardless of system theme</span>
 &lt;<span class="text-[#fde68a]">Skeleton</span> <span class="text-[#93c5fd]">loading</span>={loading} <span class="text-[#93c5fd]">dark</span>={<span class="text-[#fbbf24]">false</span>}&gt;
@@ -337,25 +257,23 @@ npx boneyard-js build http://localhost:8081 --out ./bones`} />
 
       {/* Expo / Metro */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="expo-metro">
           <span>Expo &amp; Metro setup</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          If you&apos;re using Expo or Metro bundler, import
-          from <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/native</code> (not <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/react-native</code>).
+          Import from <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/native</code> (not <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard-js/react-native</code>).
           Metro has special handling for paths containing &quot;react-native&quot; which can cause resolution issues.
         </p>
 
         <p className="text-[14px] text-[#78716c] leading-relaxed mb-4">
-          If you link the package locally during development (e.g. <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">npm install ../boneyard</code>),
-          add the source directory to Metro&apos;s watch folders so it can resolve the symlink:
+          If you link the package locally during development, add the source directory to Metro&apos;s watch folders:
         </p>
         <CodeBlock filename="metro.config.js" language="js" code={`<span class="text-[#c084fc]">const</span> { getDefaultConfig } = <span class="text-[#fde68a]">require</span>(<span class="text-[#86efac]">'expo/metro-config'</span>)
 <span class="text-[#c084fc]">const</span> path = <span class="text-[#fde68a]">require</span>(<span class="text-[#86efac]">'path'</span>)
 
 <span class="text-[#c084fc]">const</span> config = <span class="text-[#fde68a]">getDefaultConfig</span>(__dirname)
 
-<span class="text-stone-500">// Point to the local boneyard package if symlinked</span>
+<span class="text-stone-500">// Only needed for local symlinked development</span>
 <span class="text-[#c084fc]">const</span> boneyardPath = path.<span class="text-[#fde68a]">resolve</span>(__dirname, <span class="text-[#86efac]">'../boneyard/packages/boneyard'</span>)
 config.watchFolders = [boneyardPath]
 config.resolver.nodeModulesPaths = [
@@ -365,18 +283,16 @@ config.resolver.nodeModulesPaths = [
 
 module.exports = config`} />
 
-        <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 space-y-2">
-          <p className="text-[13px] font-medium text-stone-700">Published package</p>
+        <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4">
           <p className="text-[13px] text-[#78716c]">
             When using boneyard-js from npm (not a local symlink), no Metro config changes are needed.
-            Just <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">npm install boneyard-js</code> and import.
           </p>
         </div>
       </section>
 
       {/* Project structure */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="project-structure">
           <span>Project structure</span>
         </div>
         <div className="mt-4 rounded-lg border border-stone-200 bg-[#1a1a1a] p-5 font-mono text-[13px] leading-[1.8] overflow-x-auto">
@@ -384,7 +300,7 @@ module.exports = config`} />
           <div className="text-stone-400 pl-4">├── bones/</div>
           <div className="text-[#86efac] pl-8">├── profile-card.bones.json</div>
           <div className="text-[#86efac] pl-8">├── feed-item.bones.json</div>
-          <div className="text-[#fde68a] pl-8">└── registry.ts</div>
+          <div className="text-[#fde68a] pl-8">└── registry.js <span className="text-stone-600">← auto-generated</span></div>
           <div className="text-stone-400 pl-4">├── components/</div>
           <div className="text-stone-400 pl-8">├── ProfileCard.tsx</div>
           <div className="text-stone-400 pl-8">└── FeedItem.tsx</div>
@@ -396,7 +312,7 @@ module.exports = config`} />
 
       {/* Differences from web */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="differences">
           <span>Differences from web</span>
         </div>
         <div className="mt-4 rounded-lg border border-stone-200 overflow-hidden">
@@ -415,6 +331,16 @@ module.exports = config`} />
                 <td className="px-4 py-2 font-mono text-[12px]">boneyard-js/native</td>
               </tr>
               <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 text-stone-800">CLI</td>
+                <td className="px-4 py-2 font-mono text-[12px]">npx boneyard-js build</td>
+                <td className="px-4 py-2 font-mono text-[12px]">npx boneyard-js build --native</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 text-stone-800">How it scans</td>
+                <td className="px-4 py-2">Headless browser (Playwright)</td>
+                <td className="px-4 py-2">Fiber tree + UIManager on device</td>
+              </tr>
+              <tr className="border-b border-stone-100">
                 <td className="px-4 py-2 text-stone-800">Animation</td>
                 <td className="px-4 py-2">CSS keyframes</td>
                 <td className="px-4 py-2">Animated API (opacity pulse)</td>
@@ -429,17 +355,33 @@ module.exports = config`} />
                 <td className="px-4 py-2">ResizeObserver on container</td>
                 <td className="px-4 py-2">useWindowDimensions (screen width)</td>
               </tr>
-              <tr className="border-b border-stone-100">
-                <td className="px-4 py-2 text-stone-800">CLI build</td>
-                <td className="px-4 py-2">npx boneyard-js build</td>
-                <td className="px-4 py-2">npx boneyard-js build --native</td>
-              </tr>
               <tr>
                 <td className="px-4 py-2 text-stone-800">Bone format</td>
-                <td className="px-4 py-2" colSpan={2}>Identical .bones.json (compact tuples or legacy objects) — fully cross-platform</td>
+                <td className="px-4 py-2" colSpan={2}>Identical .bones.json — fully cross-platform</td>
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      {/* Auth */}
+      <section>
+        <div className="section-divider" id="auth">
+          <span>Auth-protected screens</span>
+        </div>
+        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
+          With <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">--native</code>, auth is a non-issue.
+          Your app is already running on the device with the user logged in — the Skeleton component scans
+          whatever is currently rendered. There are no cookies or headers to configure because no browser
+          is involved.
+        </p>
+        <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
+          <p className="text-[13px] text-[#78716c]">
+            The <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">auth</code> config
+            in <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">boneyard.config.json</code> (cookies, headers) is only
+            for the web CLI path where a headless browser needs to access protected pages. With <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">--native</code>,
+            the device handles auth natively — just open the screen you want to scan.
+          </p>
         </div>
       </section>
 
@@ -454,6 +396,9 @@ module.exports = config`} />
           </ul>
         </div>
       </section>
+    </div>
+
+    <TableOfContents items={tocItems} />
     </div>
   );
 }
