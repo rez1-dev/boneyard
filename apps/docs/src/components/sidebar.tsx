@@ -22,6 +22,7 @@ const frameworkGuides = [
   { href: "/react-native", label: "React Native" },
   { href: "/svelte", label: "Svelte" },
   { href: "/vue", label: "Vue" },
+  { href: "/angular", label: "Angular" },
 ];
 
 const advanced = [

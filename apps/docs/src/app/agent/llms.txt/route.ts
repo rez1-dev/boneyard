@@ -260,6 +260,7 @@ Uses Svelte 5 snippets for \`fallback\` and \`fixture\`. Same CLI: \`npx boneyar
 - \`boneyard-js/native\` — Skeleton, registerBones, configureBoneyard (React Native)
 - \`boneyard-js/svelte\` — Skeleton component, registerBones
 - \`boneyard-js/vue\` — Skeleton component, registerBones, configureBoneyard
+- \`boneyard-js/angular\` — SkeletonComponent, registerBones, configureBoneyard
 `;
 
 export async function GET() {
