@@ -176,8 +176,8 @@ export function Skeleton({
   // Use viewport width to pick breakpoint since bones are keyed by viewport width
   const effectiveBones = initialBones ?? (name ? getRegisteredBones(name) : undefined)
   const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : containerWidth
-  const activeBones = effectiveBones && containerWidth > 0
-    ? resolveResponsive(effectiveBones, viewportWidth)
+  const activeBones = effectiveBones && (viewportWidth > 0 || containerWidth > 0)
+    ? resolveResponsive(effectiveBones, viewportWidth || containerWidth)
     : null
 
   const showSkeleton = loading && activeBones

@@ -75,8 +75,8 @@
   let effectiveBones = $derived(initialBones ?? (name ? getRegisteredBones(name) : undefined))
   let viewportWidth = $derived(typeof window !== 'undefined' ? window.innerWidth : containerWidth)
   let activeBones = $derived(
-    effectiveBones && containerWidth > 0
-      ? resolveResponsive(effectiveBones, viewportWidth)
+    effectiveBones && (viewportWidth > 0 || containerWidth > 0)
+      ? resolveResponsive(effectiveBones, viewportWidth || containerWidth)
       : null,
   )
   let showSkeleton = $derived(loading && !!activeBones)
