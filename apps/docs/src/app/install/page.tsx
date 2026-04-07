@@ -1,7 +1,18 @@
 import { CodeBlock } from "@/components/ui/code-block";
+import { TableOfContents } from "@/components/toc";
+
+const tocItems = [
+  { id: "install", label: "1. Install" },
+  { id: "wrap-your-component", label: "2. Wrap your component" },
+  { id: "generate-bones", label: "3. Generate bones" },
+  { id: "register-bones", label: "4. Register bones" },
+  { id: "your-project-after-setup", label: "Your project after setup" },
+  { id: "customization", label: "Customization" },
+];
 
 export default function InstallPage() {
   return (
+    <div className="flex gap-10">
     <div className="max-w-[720px] px-6 pt-14 pb-12 space-y-12">
       <div>
         <h1 className="text-[28px] font-bold tracking-tight mb-2">Getting Started</h1>
@@ -12,7 +23,7 @@ export default function InstallPage() {
 
       {/* Step 1 — Install */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="install">
           <span>1. Install</span>
         </div>
         <div className="mt-4">
@@ -25,7 +36,7 @@ export default function InstallPage() {
 
       {/* Step 2 — Wrap */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="wrap-your-component">
           <span>2. Wrap your component</span>
         </div>
         <div className="mt-4">
@@ -80,7 +91,7 @@ export default function InstallPage() {
 
       {/* Step 3 — Build */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="generate-bones">
           <span>3. Generate bones</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
@@ -122,7 +133,7 @@ export default function InstallPage() {
 
       {/* Step 4 — Register */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="register-bones">
           <span>4. Register bones</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
@@ -162,7 +173,7 @@ export default function InstallPage() {
 
       {/* Project structure */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="your-project-after-setup">
           <span>Your project after setup</span>
         </div>
         <div className="mt-4 rounded-lg border border-stone-200 bg-[#1a1a1a] p-5 font-mono text-[13px] leading-[1.8] overflow-x-auto">
@@ -196,7 +207,7 @@ export default function InstallPage() {
 
       {/* Customization */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="customization">
           <span>Customization</span>
         </div>
         <div className="mt-4 space-y-4">
@@ -222,6 +233,100 @@ export default function InstallPage() {
         </div>
       </section>
 
+      {/* Config file */}
+      <section>
+        <div className="section-divider" id="config-file">
+          <span>Config file</span>
+        </div>
+        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
+          Create a <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard.config.json</code> in your project root.
+          Controls both the CLI and runtime defaults. Works with all frameworks.
+        </p>
+        <CodeBlock filename="boneyard.config.json" language="json" code={`{
+  <span class="text-stone-500">// Build options</span>
+  <span class="text-[#93c5fd]">"breakpoints"</span>: [<span class="text-[#fbbf24]">375</span>, <span class="text-[#fbbf24]">768</span>, <span class="text-[#fbbf24]">1280</span>],
+  <span class="text-[#93c5fd]">"out"</span>: <span class="text-[#86efac]">"./src/bones"</span>,
+  <span class="text-[#93c5fd]">"wait"</span>: <span class="text-[#fbbf24]">800</span>,
+
+  <span class="text-stone-500">// Runtime defaults</span>
+  <span class="text-[#93c5fd]">"color"</span>: <span class="text-[#86efac]">"#e5e5e5"</span>,
+  <span class="text-[#93c5fd]">"darkColor"</span>: <span class="text-[#86efac]">"rgba(255,255,255,0.08)"</span>,
+  <span class="text-[#93c5fd]">"animate"</span>: <span class="text-[#86efac]">"pulse"</span>,
+
+  <span class="text-stone-500">// Auth (for protected pages — web only)</span>
+  <span class="text-[#93c5fd]">"resolveEnvVars"</span>: <span class="text-[#fbbf24]">true</span>,
+  <span class="text-[#93c5fd]">"auth"</span>: {
+    <span class="text-[#93c5fd]">"cookies"</span>: [{ <span class="text-[#93c5fd]">"name"</span>: <span class="text-[#86efac]">"session"</span>, <span class="text-[#93c5fd]">"value"</span>: <span class="text-[#86efac]">"env[SESSION_TOKEN]"</span> }],
+    <span class="text-[#93c5fd]">"headers"</span>: { <span class="text-[#93c5fd]">"Authorization"</span>: <span class="text-[#86efac]">"Bearer env[API_TOKEN]"</span> }
+  }
+}`} />
+        <div className="mt-4 rounded-lg border border-stone-200 overflow-hidden">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="bg-stone-50 border-b border-stone-200">
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Key</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Type</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Default</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Description</th>
+              </tr>
+            </thead>
+            <tbody className="text-[#78716c]">
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">breakpoints</td>
+                <td className="px-4 py-2">number[]</td>
+                <td className="px-4 py-2">auto</td>
+                <td className="px-4 py-2">Viewport widths (auto-detects Tailwind)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">out</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">./src/bones</td>
+                <td className="px-4 py-2">Output directory</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">wait</td>
+                <td className="px-4 py-2">number</td>
+                <td className="px-4 py-2">800</td>
+                <td className="px-4 py-2">ms to wait after page load</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">color</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">rgba(0,0,0,0.08)</td>
+                <td className="px-4 py-2">Default bone color (light mode)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">darkColor</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">rgba(255,255,255,0.06)</td>
+                <td className="px-4 py-2">Default bone color (dark mode)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">animate</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">pulse</td>
+                <td className="px-4 py-2">Default animation (pulse, shimmer, solid)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">auth</td>
+                <td className="px-4 py-2">object</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Cookies and headers for protected pages (web only)</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 font-mono text-stone-800">resolveEnvVars</td>
+                <td className="px-4 py-2">boolean</td>
+                <td className="px-4 py-2">false</td>
+                <td className="px-4 py-2">Replace env[VAR] in auth values</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="text-[13px] text-stone-400 mt-3">
+          CLI flags override config. Per-component props override runtime defaults.
+        </p>
+      </section>
+
       {/* Next steps */}
       <section>
         <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
@@ -233,6 +338,9 @@ export default function InstallPage() {
           </ul>
         </div>
       </section>
+    </div>
+
+    <TableOfContents items={tocItems} />
     </div>
   );
 }

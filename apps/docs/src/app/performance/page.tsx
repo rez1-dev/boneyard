@@ -1,7 +1,17 @@
 import { CodeBlock } from "@/components/ui/code-block";
+import { TableOfContents } from "@/components/toc";
+
+const tocItems = [
+  { id: "how-it-works", label: "How it works" },
+  { id: "default-path", label: "Default path" },
+  { id: "explicit-compiled-path", label: "Explicit compiled path" },
+  { id: "mutation-detection", label: "Mutation detection" },
+  { id: "benchmarks", label: "Benchmarks" },
+];
 
 export default function PerformancePage() {
   return (
+    <div className="flex gap-10">
     <div className="max-w-[720px] px-6 pt-14 pb-12 space-y-12">
       <div>
         <h1 className="text-[28px] font-bold tracking-tight mb-2">Performance</h1>
@@ -13,7 +23,7 @@ export default function PerformancePage() {
 
       {/* How it works */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="how-it-works">
           <span>How it works</span>
         </div>
         <div className="mt-4 space-y-4">
@@ -47,7 +57,7 @@ export default function PerformancePage() {
 
       {/* Default path */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="default-path">
           <span>Default path</span>
         </div>
         <div className="mt-4 space-y-4">
@@ -71,7 +81,7 @@ const desktop = computeLayout(descriptor, 1280)  // warm: reuses compiled`}
 
       {/* Explicit compiled path */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="explicit-compiled-path">
           <span>Explicit compiled path</span>
         </div>
         <div className="mt-4 space-y-4">
@@ -104,7 +114,7 @@ const desktop = computeLayout(compiled, 1280)  // hot`}
 
       {/* Mutation detection */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="mutation-detection">
           <span>Mutation detection</span>
         </div>
         <div className="mt-4 space-y-4">
@@ -134,7 +144,7 @@ invalidateDescriptor(descriptor)  // clears cached compiled state`}
 
       {/* Benchmarks */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="benchmarks">
           <span>Benchmarks</span>
         </div>
         <div className="mt-4 space-y-4">
@@ -184,6 +194,9 @@ invalidateDescriptor(descriptor)  // clears cached compiled state`}
           </p>
         </div>
       </section>
+    </div>
+
+    <TableOfContents items={tocItems} />
     </div>
   );
 }

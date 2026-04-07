@@ -174,10 +174,17 @@ export function Skeleton({
 
   // Resolve bones: explicit initialBones > registry lookup
   // Use viewport width to pick breakpoint since bones are keyed by viewport width
+  // After mount, use window.innerWidth as fallback so bones render immediately
+  // without waiting for ResizeObserver. Before mount (SSR/hydration), use 0
+  // to avoid hydration mismatch.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const effectiveBones = initialBones ?? (name ? getRegisteredBones(name) : undefined)
-  const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : containerWidth
-  const activeBones = effectiveBones && containerWidth > 0
-    ? resolveResponsive(effectiveBones, viewportWidth)
+  const viewportWidth = mounted && typeof window !== 'undefined' ? window.innerWidth : 0
+  const resolveWidth = containerWidth > 0 ? containerWidth : viewportWidth
+  const activeBones = effectiveBones && resolveWidth > 0
+    ? resolveResponsive(effectiveBones, resolveWidth)
     : null
 
   const showSkeleton = loading && activeBones

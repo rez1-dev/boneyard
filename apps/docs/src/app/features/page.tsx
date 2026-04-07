@@ -55,6 +55,12 @@ export default function FeaturesPage() {
             <p className="text-[13px] font-medium text-stone-500 mb-2">4. Import the registry</p>
             <CodeBlock language="tsx" code={`<span class="text-stone-500">// Add once in your app entry (e.g. layout.tsx, _app.tsx, main.tsx)</span>
 <span class="text-[#c084fc]">import</span> <span class="text-[#86efac]">'./bones/registry'</span>`} />
+            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <p className="text-[13px] text-amber-700">
+                <strong className="text-amber-800">This import is required.</strong> Without it, skeletons won&apos;t render — the Skeleton component
+                needs the registry to resolve bone data by name. Import it once at the top level of your app.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -276,6 +282,11 @@ export default function FeaturesPage() {
                 <td className="px-4 py-2">—</td>
                 <td className="px-4 py-2">Skip incremental cache, recapture all</td>
               </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">--watch</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Re-capture when your app changes (listens for HMR)</td>
+              </tr>
               <tr>
                 <td className="px-4 py-2 font-mono text-stone-800">--native</td>
                 <td className="px-4 py-2">—</td>
@@ -297,7 +308,10 @@ npx boneyard-js build http://localhost:3000/dashboard
 npx boneyard-js build --breakpoints 390,820,1440 --out ./public/bones
 
 <span class="text-stone-500"># Force recapture all (skip incremental cache)</span>
-npx boneyard-js build --force`} />
+npx boneyard-js build --force
+
+<span class="text-stone-500"># Watch mode — re-captures when your app changes</span>
+npx boneyard-js build --watch`} />
         </div>
 
         <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 space-y-2">
@@ -323,83 +337,9 @@ npx boneyard-js build --force`} />
         <div className="section-divider" id="config-file">
           <span>Config file</span>
         </div>
-        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          Create a <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">boneyard.config.json</code> in
-          your project root. It controls both the CLI build and the runtime defaults for all{" "}
-          <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">&lt;Skeleton&gt;</code> components.
-          Per-component props and CLI flags always override these values.
-        </p>
-        <CodeBlock
-          filename="boneyard.config.json"
-          language="json"
-          code={`{
-  <span class="text-stone-500">// Build options</span>
-  <span class="text-[#93c5fd]">"breakpoints"</span>: [<span class="text-[#fbbf24]">375</span>, <span class="text-[#fbbf24]">640</span>, <span class="text-[#fbbf24]">768</span>, <span class="text-[#fbbf24]">1024</span>, <span class="text-[#fbbf24]">1280</span>, <span class="text-[#fbbf24]">1536</span>],
-  <span class="text-[#93c5fd]">"out"</span>: <span class="text-[#86efac]">"./src/bones"</span>,
-  <span class="text-[#93c5fd]">"wait"</span>: <span class="text-[#fbbf24]">800</span>,
-
-  <span class="text-stone-500">// Runtime defaults (applied to all skeletons)</span>
-  <span class="text-[#93c5fd]">"color"</span>: <span class="text-[#86efac]">"#e5e5e5"</span>,
-  <span class="text-[#93c5fd]">"darkColor"</span>: <span class="text-[#86efac]">"rgba(255,255,255,0.08)"</span>,
-  <span class="text-[#93c5fd]">"animate"</span>: <span class="text-[#86efac]">"pulse"</span>
-}`}
-        />
-        <p className="text-[13px] text-stone-400 mt-2 mb-4">
-          Runtime defaults are automatically included in the generated{" "}
-          <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">registry.js</code> — no extra imports or function calls needed.
-        </p>
-        <div className="mt-4 rounded-lg border border-stone-200 overflow-hidden">
-          <table className="w-full text-[13px]">
-            <thead>
-              <tr className="bg-stone-50 border-b border-stone-200">
-                <th className="text-left px-4 py-2 font-medium text-stone-700">Key</th>
-                <th className="text-left px-4 py-2 font-medium text-stone-700">Type</th>
-                <th className="text-left px-4 py-2 font-medium text-stone-700">Default</th>
-                <th className="text-left px-4 py-2 font-medium text-stone-700">Description</th>
-              </tr>
-            </thead>
-            <tbody className="text-[#78716c]">
-              <tr className="border-b border-stone-100">
-                <td className="px-4 py-2 font-mono text-stone-800">breakpoints</td>
-                <td className="px-4 py-2">number[]</td>
-                <td className="px-4 py-2">auto</td>
-                <td className="px-4 py-2">Viewport widths (auto-detects Tailwind)</td>
-              </tr>
-              <tr className="border-b border-stone-100">
-                <td className="px-4 py-2 font-mono text-stone-800">out</td>
-                <td className="px-4 py-2">string</td>
-                <td className="px-4 py-2">./src/bones</td>
-                <td className="px-4 py-2">Output directory</td>
-              </tr>
-              <tr className="border-b border-stone-100">
-                <td className="px-4 py-2 font-mono text-stone-800">wait</td>
-                <td className="px-4 py-2">number</td>
-                <td className="px-4 py-2">800</td>
-                <td className="px-4 py-2">ms to wait after page load</td>
-              </tr>
-              <tr className="border-b border-stone-100">
-                <td className="px-4 py-2 font-mono text-stone-800">color</td>
-                <td className="px-4 py-2">string</td>
-                <td className="px-4 py-2">rgba(0,0,0,0.08)</td>
-                <td className="px-4 py-2">Default bone color (light mode)</td>
-              </tr>
-              <tr className="border-b border-stone-100">
-                <td className="px-4 py-2 font-mono text-stone-800">darkColor</td>
-                <td className="px-4 py-2">string</td>
-                <td className="px-4 py-2">rgba(255,255,255,0.06)</td>
-                <td className="px-4 py-2">Default bone color (dark mode)</td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-mono text-stone-800">animate</td>
-                <td className="px-4 py-2">string</td>
-                <td className="px-4 py-2">pulse</td>
-                <td className="px-4 py-2">Default animation (pulse, shimmer, solid)</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p className="text-[13px] text-stone-400 mt-3">
-          Priority: per-component prop &rarr; config file &rarr; built-in defaults.
+        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4">
+          See <a href="/install#config-file" className="text-stone-800 underline underline-offset-2">Install &rarr; Config file</a> for
+          the full <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">boneyard.config.json</code> reference. Works with all frameworks.
         </p>
       </section>
     </div>

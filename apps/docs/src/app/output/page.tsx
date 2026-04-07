@@ -1,16 +1,17 @@
 import { CodeBlock } from "@/components/ui/code-block";
+import { TableOfContents } from "@/components/toc";
 
-function PropDef({ name, children }: { name: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 py-2 first:pt-0">
-      <code className="font-[family-name:var(--font-mono)] text-[13px] text-[#1c1917] sm:w-28 shrink-0 font-medium">{name}</code>
-      <p className="text-[14px] text-[#78716c] leading-relaxed">{children}</p>
-    </div>
-  );
-}
+const tocItems = [
+  { id: "generated-files", label: "Generated files" },
+  { id: "skeleton-result", label: "SkeletonResult" },
+  { id: "bone-fields", label: "Bone fields" },
+  { id: "result-fields", label: "Result fields" },
+  { id: "direct-api", label: "Direct API (non-React)" },
+];
 
 export default function OutputPage() {
   return (
+    <div className="flex gap-10">
     <div className="max-w-[720px] px-6 pt-14 pb-12 space-y-12">
       {/* Header */}
       <div>
@@ -20,21 +21,24 @@ export default function OutputPage() {
         </p>
       </div>
 
-      {/* Where files live */}
+      {/* Generated files */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="generated-files">
           <span>Generated files</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          Running <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">npx boneyard-js build</code> creates
-          one <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> file per
-          named <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">&lt;Skeleton&gt;</code> in your app:
+          Running <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">npx boneyard-js build</code> scans
+          your app for named <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">&lt;Skeleton&gt;</code> components,
+          captures bone data at each breakpoint, and writes the results
+          to <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> files. A <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">registry.js</code> file
+          is also generated so every skeleton can be imported in one line.
         </p>
         <div className="rounded-lg border border-stone-200 bg-[#1a1a1a] p-5 font-mono text-[13px] leading-[1.8]">
           <div className="text-stone-500">src/bones/ <span className="text-stone-600">← auto-created by the CLI</span></div>
           <div className="text-[#86efac] pl-4">├── blog-card.bones.json <span className="text-stone-600">← from &lt;Skeleton name=&quot;blog-card&quot;&gt;</span></div>
           <div className="text-[#86efac] pl-4">├── profile.bones.json</div>
-          <div className="text-[#86efac] pl-4">└── dashboard.bones.json</div>
+          <div className="text-[#86efac] pl-4">├── dashboard.bones.json</div>
+          <div className="text-[#86efac] pl-4">└── registry.js <span className="text-stone-600">← import once in your app entry</span></div>
         </div>
         <p className="text-[13px] text-stone-400 mt-2">
           Each file contains responsive bone data captured at multiple viewport widths. Breakpoints are auto-detected from Tailwind or set
@@ -46,7 +50,7 @@ export default function OutputPage() {
 
       {/* SkeletonResult */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="skeleton-result">
           <span>SkeletonResult</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
@@ -71,43 +75,110 @@ export default function OutputPage() {
 
       {/* Bone fields */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="bone-fields">
           <span>Bone fields</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          Each bone is a compact array: <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">[x, y, w, h, r]</code> with
-          an optional 6th element for container bones. <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">x</code> and <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">w</code> are
-          percentages of the container width. <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">y</code> and <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">h</code> are pixels.
+          Each bone is stored as a compact tuple: <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">[x, y, w, h, r, c?]</code>.
+          The 6th element is optional and only present for container bones.
         </p>
-        <div className="divide-y divide-stone-100">
-          <PropDef name="x">Horizontal offset from the left edge (px).</PropDef>
-          <PropDef name="y">Vertical offset from the top edge (px).</PropDef>
-          <PropDef name="w">Width (px).</PropDef>
-          <PropDef name="h">Height (px).</PropDef>
-          <PropDef name="r">Border radius. A number for pixels, or a string like <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">&quot;50%&quot;</code> for circles.</PropDef>
-          <PropDef name="c">
-            Container flag. When <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">true</code>, this bone represents a container element (card, panel) that has child bones on top. Rendered at a lighter shade so children stand out.
-          </PropDef>
+        <div className="rounded-lg border border-stone-200 overflow-hidden">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="bg-stone-50 border-b border-stone-200">
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Field</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Type</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Description</th>
+              </tr>
+            </thead>
+            <tbody className="text-[#78716c]">
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">x</td>
+                <td className="px-4 py-2">number</td>
+                <td className="px-4 py-2">Horizontal offset as a percentage of the container width</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">y</td>
+                <td className="px-4 py-2">number</td>
+                <td className="px-4 py-2">Vertical offset from the top edge in pixels</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">w</td>
+                <td className="px-4 py-2">number</td>
+                <td className="px-4 py-2">Width as a percentage of the container width</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">h</td>
+                <td className="px-4 py-2">number</td>
+                <td className="px-4 py-2">Height in pixels</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">r</td>
+                <td className="px-4 py-2">{`number | "50%"`}</td>
+                <td className="px-4 py-2">Border radius — a number for pixels, or <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">&quot;50%&quot;</code> for circles</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 font-mono text-stone-800">c</td>
+                <td className="px-4 py-2">true (optional)</td>
+                <td className="px-4 py-2">Container bone flag — when <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">true</code>, this bone represents a container element (card, panel) and is rendered at a lighter shade so child bones stand out</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
-      {/* Result-level fields */}
+      {/* Result fields */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="result-fields">
           <span>Result fields</span>
         </div>
-        <div className="mt-4 divide-y divide-stone-100">
-          <PropDef name="name">Identifier from the <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">name</code> prop, or <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">&apos;component&apos;</code> by default.</PropDef>
-          <PropDef name="viewportWidth">Browser viewport width at capture time (px).</PropDef>
-          <PropDef name="width">Container element width at capture time (px).</PropDef>
-          <PropDef name="height">Total content height (px). Used to size the skeleton overlay.</PropDef>
-          <PropDef name="bones">Flat array of positioned rectangles — every visible element as a bone.</PropDef>
+        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
+          Top-level fields on each <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">SkeletonResult</code> object
+          in the <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">.bones.json</code> file.
+        </p>
+        <div className="rounded-lg border border-stone-200 overflow-hidden">
+          <table className="w-full text-[13px]">
+            <thead>
+              <tr className="bg-stone-50 border-b border-stone-200">
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Field</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Type</th>
+                <th className="text-left px-4 py-2 font-medium text-stone-700">Description</th>
+              </tr>
+            </thead>
+            <tbody className="text-[#78716c]">
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">name</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">Identifier from the <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">name</code> prop, or <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">&apos;component&apos;</code> by default</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">viewportWidth</td>
+                <td className="px-4 py-2">number</td>
+                <td className="px-4 py-2">Browser viewport width at capture time (px)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">width</td>
+                <td className="px-4 py-2">number</td>
+                <td className="px-4 py-2">Container element width at capture time (px)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">height</td>
+                <td className="px-4 py-2">number</td>
+                <td className="px-4 py-2">Total content height (px) — used to size the skeleton overlay</td>
+              </tr>
+              <tr>
+                <td className="px-4 py-2 font-mono text-stone-800">bones</td>
+                <td className="px-4 py-2">Bone[]</td>
+                <td className="px-4 py-2">Flat array of positioned rectangles — every visible element as a bone</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
       {/* Direct API */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="direct-api">
           <span>Direct API (non-React)</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
@@ -140,6 +211,9 @@ container.innerHTML = html`} />
           the React <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">&lt;Skeleton&gt;</code> wrapper which handles everything automatically.
         </p>
       </div>
+    </div>
+
+    <TableOfContents items={tocItems} />
     </div>
   );
 }

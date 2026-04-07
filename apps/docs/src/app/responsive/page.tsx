@@ -5,6 +5,15 @@ import { snapshotBones } from "boneyard-js";
 import type { Bone } from "boneyard-js";
 import { BrowserMockup } from "@/components/browser-mockup";
 import { CodeBlock } from "@/components/ui/code-block";
+import { TableOfContents } from "@/components/toc";
+
+const tocItems = [
+  { id: "how-it-works", label: "How it works" },
+  { id: "same-component-different-breakpoints", label: "Same component, different breakpoints" },
+  { id: "what-the-json-looks-like", label: "What the JSON looks like" },
+  { id: "custom-breakpoints", label: "Custom breakpoints" },
+  { id: "how-breakpoint-selection-works", label: "How breakpoint selection works" },
+];
 
 // ── Example component that changes layout at different widths ──
 // Uses a width prop to simulate responsive behavior at different breakpoints
@@ -109,6 +118,7 @@ function SkeletonPreview({ children }: { children: React.ReactNode }) {
 
 export default function ResponsivePage() {
   return (
+    <div className="flex gap-10">
     <div className="max-w-[720px] px-6 pt-14 pb-12 space-y-10">
       {/* Header */}
       <div>
@@ -121,7 +131,7 @@ export default function ResponsivePage() {
 
       {/* How it works */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="how-it-works">
           <span>How it works</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
@@ -145,7 +155,7 @@ export default function ResponsivePage() {
 
       {/* Breakpoint examples */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="same-component-different-breakpoints">
           <span>Same component, different breakpoints</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-6">
@@ -178,7 +188,7 @@ export default function ResponsivePage() {
 
       {/* Output format */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="what-the-json-looks-like">
           <span>What the JSON looks like</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
@@ -211,7 +221,7 @@ export default function ResponsivePage() {
 
       {/* Custom breakpoints */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="custom-breakpoints">
           <span>Custom breakpoints</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
@@ -234,7 +244,7 @@ export default function ResponsivePage() {
 
       {/* How selection works */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="how-breakpoint-selection-works">
           <span>How breakpoint selection works</span>
         </div>
         <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 space-y-2">
@@ -258,6 +268,9 @@ export default function ResponsivePage() {
           </ul>
         </div>
       </section>
+    </div>
+
+    <TableOfContents items={tocItems} />
     </div>
   );
 }

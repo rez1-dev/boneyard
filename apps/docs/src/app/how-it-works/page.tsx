@@ -4,7 +4,12 @@ import { useRef, useEffect, useState } from "react";
 import { snapshotBones } from "boneyard-js";
 import type { Bone } from "boneyard-js";
 import { BrowserMockup } from "@/components/browser-mockup";
+import { TableOfContents } from "@/components/toc";
 
+const tocItems = [
+  { id: "under-the-hood", label: "Under the hood" },
+  { id: "layout-api", label: "Layout API" },
+];
 
 // ── The example card used across all 3 steps ──
 
@@ -104,6 +109,7 @@ function SkeletonCard() {
 
 export default function HowItWorksPage() {
   return (
+    <div className="flex gap-10">
     <div className="max-w-[720px] px-6 pt-14 pb-12 space-y-8">
       {/* Header */}
       <div>
@@ -134,7 +140,7 @@ export default function HowItWorksPage() {
 
       {/* Under the hood */}
       <div>
-        <div className="section-divider">
+        <div className="section-divider" id="under-the-hood">
           <span>Under the hood</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-6">
@@ -201,7 +207,7 @@ export default function HowItWorksPage() {
 
       {/* Layout API */}
       <div>
-        <div className="section-divider">
+        <div className="section-divider" id="layout-api">
           <span>Layout API</span>
         </div>
         <div className="mt-4 space-y-5">
@@ -271,6 +277,9 @@ const desktop = computeLayout(compiled, 1280);`}</code></pre>
           auto-resolves its bones from the registry — no per-component imports needed.
         </p>
       </div>
+    </div>
+
+    <TableOfContents items={tocItems} />
     </div>
   );
 }

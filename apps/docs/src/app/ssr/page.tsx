@@ -5,6 +5,14 @@ import { snapshotBones } from "boneyard-js";
 import type { Bone } from "boneyard-js";
 import { BrowserMockup } from "@/components/browser-mockup";
 import { CodeBlock } from "@/components/ui/code-block";
+import { TableOfContents } from "@/components/toc";
+
+const tocItems = [
+  { id: "how-it-works", label: "How it works" },
+  { id: "live-examples", label: "Live examples" },
+  { id: "when-to-use-ssr-skeletons", label: "When to use SSR skeletons" },
+  { id: "why-boneyard-is-ssr-friendly", label: "Why boneyard is SSR-friendly" },
+];
 
 // ── Example components ──
 
@@ -126,6 +134,7 @@ function SkeletonPreview({ children }: { children: React.ReactNode }) {
 
 export default function SSRPage() {
   return (
+    <div className="flex gap-10">
     <div className="max-w-[720px] px-6 pt-14 pb-12 space-y-10">
       {/* Header */}
       <div>
@@ -140,7 +149,7 @@ export default function SSRPage() {
 
       {/* How it works */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="how-it-works">
           <span>How it works</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
@@ -159,7 +168,7 @@ export default function SSRPage() {
 
       {/* Live examples */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="live-examples">
           <span>Live examples</span>
         </div>
         <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-6">
@@ -244,7 +253,7 @@ export default function SSRPage() {
 
       {/* When to use */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="when-to-use-ssr-skeletons">
           <span>When to use SSR skeletons</span>
         </div>
         <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 space-y-2">
@@ -267,7 +276,7 @@ export default function SSRPage() {
 
       {/* Why it works */}
       <section>
-        <div className="section-divider">
+        <div className="section-divider" id="why-boneyard-is-ssr-friendly">
           <span>Why boneyard is SSR-friendly</span>
         </div>
         <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 space-y-2">
@@ -295,6 +304,9 @@ export default function SSRPage() {
           </ul>
         </div>
       </section>
+    </div>
+
+    <TableOfContents items={tocItems} />
     </div>
   );
 }

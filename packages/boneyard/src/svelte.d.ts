@@ -1,13 +1,15 @@
 import type { Component, Snippet } from 'svelte'
 import type { ResponsiveBones, SkeletonResult, SnapshotConfig } from './types.js'
 
+export type AnimationStyle = 'pulse' | 'shimmer' | 'solid' | boolean
+
 export interface SkeletonProps {
   loading: boolean
   name?: string
   initialBones?: SkeletonResult | ResponsiveBones
   color?: string
   darkColor?: string
-  animate?: boolean
+  animate?: AnimationStyle
   class?: string
   className?: string
   fallback?: Snippet
@@ -20,3 +22,4 @@ declare const Skeleton: Component<SkeletonProps>
 
 export default Skeleton
 export { registerBones } from './shared.js'
+export function configureBoneyard(config: { color?: string; darkColor?: string; animate?: AnimationStyle }): void

@@ -84,8 +84,8 @@ const viewportWidth = computed(() =>
 )
 
 const activeBones = computed(() =>
-  effectiveBones.value && containerWidth.value > 0
-    ? resolveResponsive(effectiveBones.value, viewportWidth.value)
+  effectiveBones.value && (viewportWidth.value > 0 || containerWidth.value > 0)
+    ? resolveResponsive(effectiveBones.value, viewportWidth.value || containerWidth.value)
     : null
 )
 
