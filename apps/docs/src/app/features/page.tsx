@@ -287,6 +287,16 @@ export default function FeaturesPage() {
                 <td className="px-4 py-2">—</td>
                 <td className="px-4 py-2">Re-capture when your app changes (listens for HMR)</td>
               </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">--no-scan</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Skip filesystem route scanning (only crawl links)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">--env-file &lt;path&gt;</td>
+                <td className="px-4 py-2">—</td>
+                <td className="px-4 py-2">Load env vars from file (useful for Bun runtime)</td>
+              </tr>
               <tr>
                 <td className="px-4 py-2 font-mono text-stone-800">--native</td>
                 <td className="px-4 py-2">—</td>

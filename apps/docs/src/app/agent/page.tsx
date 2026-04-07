@@ -151,6 +151,8 @@ npx boneyard-js build [url] [options]
   --wait <ms>          Extra wait after page load (default: 800)
   --force              Recapture all (skip incremental cache)
   --watch              Re-capture when your app changes (listens for HMR)
+  --no-scan            Skip filesystem route scanning (only crawl links)
+  --env-file <path>    Load env vars from file (useful for Bun runtime)
   --native             React Native mode — scans from device (no browser)
 \`\`\`
 
