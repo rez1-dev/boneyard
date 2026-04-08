@@ -141,7 +141,11 @@ const HOST_TEXT = 6
 const LEAF_TYPES = new Set(['RCTText', 'RCTImage', 'RCTImageView', 'Image', 'Text'])
 
 function getFiber(ref: any): FiberNode | null {
-  return ref?._reactInternals ?? ref?._reactInternalInstance ?? null
+  return ref?.__internalInstanceHandle
+    ?? ref?._internalFiberInstanceHandleDEV
+    ?? ref?._reactInternals
+    ?? ref?._reactInternalInstance
+    ?? null
 }
 
 interface ScannedView {

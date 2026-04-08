@@ -214,6 +214,7 @@ async function sendBones(name: string, result: SkeletonResult): Promise<void> {
 /** Get the React fiber node from a native ref */
 function getFiber(ref: any): FiberNode | null {
   const fiber = ref?.__internalInstanceHandle
+    ?? ref?._internalFiberInstanceHandleDEV
     ?? ref?._reactInternals
     ?? ref?._reactInternalInstance
     ?? null
