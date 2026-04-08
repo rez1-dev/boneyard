@@ -21,6 +21,8 @@ interface BoneyardConfig {
   color?: string
   darkColor?: string
   animate?: AnimationStyle
+  stagger?: number | boolean
+  transition?: number | boolean
 }
 
 let globalConfig: BoneyardConfig = {}
@@ -195,10 +197,10 @@ export function Skeleton({
     : null
 
   // Stagger: delay between each bone's animation
-  const staggerMs = stagger === true ? 80 : stagger === false ? 0 : stagger
+  const staggerMs = (() => { const v = stagger ?? globalConfig.stagger; return v === true ? 80 : v === false || !v ? 0 : v })()
 
   // Transition: fade out skeleton when loading ends
-  const transitionMs = transition === true ? 300 : transition === false ? 0 : transition
+  const transitionMs = (() => { const v = transition ?? globalConfig.transition; return v === true ? 300 : v === false || !v ? 0 : v })()
   const [transitioning, setTransitioning] = useState(false)
   const prevLoadingRef = useRef(loading)
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)

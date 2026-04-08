@@ -31,6 +31,8 @@ interface BoneyardConfig {
   color?: string
   darkColor?: string
   animate?: AnimationStyle
+  stagger?: number | boolean
+  transition?: number | boolean
 }
 
 let _globalConfig: BoneyardConfig = {}
@@ -136,11 +138,13 @@ export class SkeletonComponent implements AfterViewInit, OnDestroy, OnChanges {
   transitioning = false
 
   get staggerMs(): number {
-    return this.stagger === true ? 80 : this.stagger === false ? 0 : this.stagger
+    const v = this.stagger ?? _globalConfig.stagger
+    return v === true ? 80 : v === false || !v ? 0 : v
   }
 
   get transitionMs(): number {
-    return this.transition === true ? 300 : this.transition === false ? 0 : this.transition
+    const v = this.transition ?? _globalConfig.transition
+    return v === true ? 300 : v === false || !v ? 0 : v
   }
 
   private transitionTimer: any = null

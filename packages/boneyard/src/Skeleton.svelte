@@ -7,6 +7,8 @@
     color?: string
     darkColor?: string
     animate?: AnimationStyle
+    stagger?: number | boolean
+    transition?: number | boolean
   }
 
   let _globalConfig: BoneyardConfig = {}
@@ -81,8 +83,8 @@
       ? resolveResponsive(effectiveBones, viewportWidth || containerWidth)
       : null,
   )
-  let staggerMs = $derived(stagger === true ? 80 : stagger === false ? 0 : (stagger || 0))
-  let transitionMs = $derived(transition === true ? 300 : transition === false ? 0 : (transition || 0))
+  let staggerMs = $derived((() => { const v = stagger ?? _globalConfig.stagger; return v === true ? 80 : v === false || !v ? 0 : v })())
+  let transitionMs = $derived((() => { const v = transition ?? _globalConfig.transition; return v === true ? 300 : v === false || !v ? 0 : v })())
   let transitioning = $state(false)
   let prevLoading = $state(loading)
 

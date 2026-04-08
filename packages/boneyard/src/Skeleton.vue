@@ -18,6 +18,8 @@ interface BoneyardConfig {
   color?: string
   darkColor?: string
   animate?: AnimationStyle
+  stagger?: number | boolean
+  transition?: number | boolean
 }
 
 let _globalConfig: BoneyardConfig = {}
@@ -92,10 +94,16 @@ const activeBones = computed(() =>
 )
 
 // Stagger
-const staggerMs = computed(() => props.stagger === true ? 80 : props.stagger === false || !props.stagger ? 0 : props.stagger)
+const staggerMs = computed(() => {
+  const v = props.stagger ?? _globalConfig.stagger
+  return v === true ? 80 : v === false || !v ? 0 : v
+})
 
 // Transition
-const transitionMs = computed(() => props.transition === true ? 300 : props.transition === false || !props.transition ? 0 : props.transition)
+const transitionMs = computed(() => {
+  const v = props.transition ?? _globalConfig.transition
+  return v === true ? 300 : v === false || !v ? 0 : v
+})
 const transitioning = ref(false)
 let transitionTimer: ReturnType<typeof setTimeout> | null = null
 

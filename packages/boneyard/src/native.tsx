@@ -28,6 +28,8 @@ interface BoneyardConfig {
   color?: string
   darkColor?: string
   animate?: AnimationStyle
+  stagger?: number | boolean
+  transition?: number | boolean
 }
 
 let globalConfig: BoneyardConfig = {}
@@ -480,8 +482,8 @@ export function Skeleton({
     ? resolveResponsive(effectiveBones, screenWidth)
     : null
 
-  const staggerMs = stagger === true ? 80 : stagger === false ? 0 : stagger
-  const transitionMs = transition === true ? 300 : transition === false ? 0 : transition
+  const staggerMs = (() => { const v = stagger ?? globalConfig.stagger; return v === true ? 80 : v === false || !v ? 0 : v })()
+  const transitionMs = (() => { const v = transition ?? globalConfig.transition; return v === true ? 300 : v === false || !v ? 0 : v })()
 
   const [transitioning, setTransitioning] = useState(false)
   const fadeAnim = useRef(new Animated.Value(1)).current
