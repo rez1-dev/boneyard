@@ -100,10 +100,10 @@ export default function OverviewPage() {
   };
 
   return (
-    <div className="max-w-[720px] px-6 pt-20 md:pt-14 pb-12 space-y-10">
+    <div className="w-full max-w-[720px] px-6 pt-20 md:pt-14 pb-12 space-y-10">
       {/* Hero */}
       <div className="space-y-6">
-        <h1 className="text-[32px] leading-[1.15] font-bold tracking-tight">
+        <h1 className="text-[26px] sm:text-[32px] leading-[1.15] font-bold tracking-tight">
           Skeleton screens.
           <br />
           <span className="inline-block">

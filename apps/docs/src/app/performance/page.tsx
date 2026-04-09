@@ -11,8 +11,8 @@ const tocItems = [
 
 export default function PerformancePage() {
   return (
-    <div className="flex gap-10">
-    <div className="max-w-[720px] px-6 pt-14 pb-12 space-y-12">
+    <div className="flex gap-10 w-full min-w-0">
+    <div className="w-full max-w-[720px] px-6 pt-14 pb-12 space-y-12">
       <div>
         <h1 className="text-[28px] font-bold tracking-tight mb-2">Performance</h1>
         <p className="text-[15px] text-[#78716c] leading-relaxed">

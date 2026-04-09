@@ -1,6 +1,6 @@
 export default function ChangelogPage() {
   return (
-    <div className="max-w-[720px] px-6 pt-14 pb-12 space-y-12">
+    <div className="w-full max-w-[720px] px-6 pt-14 pb-12 space-y-12">
       <div>
         <h1 className="text-[28px] font-bold tracking-tight mb-2">Changelog</h1>
         <p className="text-[15px] text-[#78716c]">
