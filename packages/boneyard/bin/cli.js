@@ -85,6 +85,7 @@ let noScan = false
 let envFilePath = null
 let watchMode = false
 let cdpPort = null
+let config = {}
 
 for (let i = 1; i < args.length; i++) {
   if (args[i] === '--out') {
@@ -135,7 +136,6 @@ for (let i = 1; i < args.length; i++) {
 
 // ── Load config file ─────────────────────────────────────────────────────────
 
-let config = {}
 const configPath = resolve(process.cwd(), 'boneyard.config.json')
 if (existsSync(configPath)) {
   try {
