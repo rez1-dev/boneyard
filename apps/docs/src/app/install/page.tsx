@@ -250,8 +250,12 @@ export default function InstallPage() {
 
   <span class="text-stone-500">// Runtime defaults</span>
   <span class="text-[#93c5fd]">"color"</span>: <span class="text-[#86efac]">"#e5e5e5"</span>,
-  <span class="text-[#93c5fd]">"darkColor"</span>: <span class="text-[#86efac]">"rgba(255,255,255,0.08)"</span>,
-  <span class="text-[#93c5fd]">"animate"</span>: <span class="text-[#86efac]">"pulse"</span>,
+  <span class="text-[#93c5fd]">"darkColor"</span>: <span class="text-[#86efac]">"#2a2a2a"</span>,
+  <span class="text-[#93c5fd]">"animate"</span>: <span class="text-[#86efac]">"shimmer"</span>,
+  <span class="text-[#93c5fd]">"shimmerColor"</span>: <span class="text-[#86efac]">"#ebebeb"</span>,
+  <span class="text-[#93c5fd]">"darkShimmerColor"</span>: <span class="text-[#86efac]">"#333333"</span>,
+  <span class="text-[#93c5fd]">"speed"</span>: <span class="text-[#86efac]">"2s"</span>,
+  <span class="text-[#93c5fd]">"shimmerAngle"</span>: <span class="text-[#fbbf24]">110</span>,
 
   <span class="text-stone-500">// Auth (for protected pages — web only)</span>
   <span class="text-[#93c5fd]">"resolveEnvVars"</span>: <span class="text-[#fbbf24]">true</span>,
@@ -292,20 +296,44 @@ export default function InstallPage() {
               <tr className="border-b border-stone-100">
                 <td className="px-4 py-2 font-mono text-stone-800">color</td>
                 <td className="px-4 py-2">string</td>
-                <td className="px-4 py-2">rgba(0,0,0,0.08)</td>
-                <td className="px-4 py-2">Default bone color (light mode)</td>
+                <td className="px-4 py-2">#f0f0f0</td>
+                <td className="px-4 py-2">Bone fill color (light mode)</td>
               </tr>
               <tr className="border-b border-stone-100">
                 <td className="px-4 py-2 font-mono text-stone-800">darkColor</td>
                 <td className="px-4 py-2">string</td>
-                <td className="px-4 py-2">rgba(255,255,255,0.06)</td>
-                <td className="px-4 py-2">Default bone color (dark mode)</td>
+                <td className="px-4 py-2">#222222</td>
+                <td className="px-4 py-2">Bone fill color (dark mode, .dark class)</td>
               </tr>
               <tr className="border-b border-stone-100">
                 <td className="px-4 py-2 font-mono text-stone-800">animate</td>
                 <td className="px-4 py-2">string</td>
                 <td className="px-4 py-2">pulse</td>
-                <td className="px-4 py-2">Default animation (pulse, shimmer, solid)</td>
+                <td className="px-4 py-2">Animation: pulse, shimmer, or solid</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">shimmerColor</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">#f7f7f7</td>
+                <td className="px-4 py-2">Shimmer highlight color (light mode)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">darkShimmerColor</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">#2c2c2c</td>
+                <td className="px-4 py-2">Shimmer highlight color (dark mode)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">speed</td>
+                <td className="px-4 py-2">string</td>
+                <td className="px-4 py-2">2s / 1.8s</td>
+                <td className="px-4 py-2">Animation duration (shimmer / pulse)</td>
+              </tr>
+              <tr className="border-b border-stone-100">
+                <td className="px-4 py-2 font-mono text-stone-800">shimmerAngle</td>
+                <td className="px-4 py-2">number</td>
+                <td className="px-4 py-2">110</td>
+                <td className="px-4 py-2">Shimmer gradient angle in degrees</td>
               </tr>
               <tr className="border-b border-stone-100">
                 <td className="px-4 py-2 font-mono text-stone-800">auth</td>
