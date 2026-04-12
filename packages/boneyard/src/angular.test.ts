@@ -176,9 +176,9 @@ describe('Angular adapter dependencies', () => {
     it('computes overlay style for shimmer animation', () => {
       const uid = 'xyz789'
       const lighterColor = adjustColor('rgba(0,0,0,0.08)', 0.3)
-      const style = `position:absolute;inset:0;background:linear-gradient(90deg, transparent 30%, ${lighterColor} 50%, transparent 70%);background-size:200% 100%;animation:bs-${uid} 2.4s linear infinite;`
+      const style = `position:absolute;inset:0;background:linear-gradient(110deg, transparent 48.5%, ${lighterColor} 50%, transparent 51.5%);background-size:200% 100%;animation:bs-${uid} 1.6s linear infinite;`
       expect(style).toContain('bs-xyz789')
-      expect(style).toContain('2.4s')
+      expect(style).toContain('1.6s')
       expect(style).toContain('linear-gradient')
     })
   })

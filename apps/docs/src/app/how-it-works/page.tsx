@@ -83,7 +83,7 @@ export default function HowItWorksPage() {
       </div>
 
       {/* Side-by-side: Real UI vs Skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6" style={{ maxWidth: 680 }}>
         <div>
           <div className="text-[11px] font-mono text-stone-400 uppercase tracking-wider mb-2">Your component</div>
           <BrowserMockup url="localhost:3000">
@@ -118,9 +118,11 @@ export default function HowItWorksPage() {
               When <code className="font-[family-name:var(--font-mono)] text-[13px] bg-[#f5f5f4] px-1.5 py-0.5 rounded">loading</code> is
               false, your children render normally.
             </p>
-            <BrowserMockup url="localhost:3000">
-              <ExampleCard />
-            </BrowserMockup>
+            <div style={{ maxWidth: 340 }}>
+              <BrowserMockup url="localhost:3000">
+                <ExampleCard />
+              </BrowserMockup>
+            </div>
           </div>
 
           {/* Step 2 */}
@@ -142,9 +144,11 @@ export default function HowItWorksPage() {
               Customize breakpoints and defaults with{" "}
               <code className="font-[family-name:var(--font-mono)] text-[13px] bg-[#f5f5f4] px-1.5 py-0.5 rounded">boneyard.config.json</code>.
             </p>
-            <BrowserMockup url="localhost:3000">
-              <ExampleCard showScanOverlay />
-            </BrowserMockup>
+            <div style={{ maxWidth: 340 }}>
+              <BrowserMockup url="localhost:3000">
+                <ExampleCard showScanOverlay />
+              </BrowserMockup>
+            </div>
           </div>
 
           {/* Step 3 */}
@@ -158,9 +162,11 @@ export default function HowItWorksPage() {
               position from the real layout. When loading becomes false, your children
               replace the skeleton with zero layout shift.
             </p>
-            <BrowserMockup url="localhost:3000">
-              <SkeletonCard />
-            </BrowserMockup>
+            <div style={{ maxWidth: 340 }}>
+              <BrowserMockup url="localhost:3000">
+                <SkeletonCard />
+              </BrowserMockup>
+            </div>
           </div>
         </div>
       </div>

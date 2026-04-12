@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { snapshotBones } from "boneyard-js";
 import { Skeleton } from "boneyard-js/react";
 import type { SkeletonResult, SnapshotConfig } from "boneyard-js";
@@ -161,7 +161,7 @@ function useSkeletonCapture() {
 type AnimateStyle = 'pulse' | 'shimmer' | 'solid'
 
 function SkeletonSection({
-  name, loading, bones, setRef, children, fixture, stagger, transition, color, dark, animate,
+  name, loading, bones, setRef, children, fixture, stagger, transition, dark, animate,
 }: {
   name: string;
   loading: boolean;
@@ -171,12 +171,11 @@ function SkeletonSection({
   fixture?: React.ReactNode;
   stagger?: number | boolean;
   transition?: number | boolean;
-  color?: string;
   dark?: boolean;
   animate?: AnimateStyle;
 }) {
   return (
-    <Skeleton loading={loading} initialBones={bones[name]} name={name} color={color} darkColor={dark ? "rgba(255,255,255,0.08)" : undefined} animate={animate} fixture={fixture} stagger={stagger} transition={transition}>
+    <Skeleton loading={loading} initialBones={bones[name]} name={name} animate={animate} fixture={fixture} stagger={stagger} transition={transition}>
       <div ref={setRef(name)}>{children}</div>
     </Skeleton>
   );
@@ -191,6 +190,16 @@ export default function DemoPage() {
   const [transitionVal, setTransitionVal] = useState<number | false>(false);
   const [texture, setTexture] = useState<AnimateStyle>("pulse");
   const [dark, setDark] = useState(false);
+
+  // Sync .dark class on <html> so Skeleton components detect dark mode
+  useEffect(() => {
+    if (dark) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    return () => document.documentElement.classList.remove('dark')
+  }, [dark]);
 
   // Toggle skeleton with live capture for pixel-perfect accuracy
   const toggleSkeleton = useCallback(() => {
@@ -306,7 +315,7 @@ export default function DemoPage() {
               <aside className="hidden md:flex w-[220px] shrink-0 bg-white border-r border-stone-200 p-3 flex-col gap-4">
                 <div>
                   <div className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-2 px-1">Team</div>
-                  <SkeletonSection name="sidebar-nav" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                  <SkeletonSection name="sidebar-nav" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                     fixture={
                       <div className="space-y-1">
                         {["Dashboard", "Analytics", "Projects", "Team", "Settings"].map((item) => (
@@ -341,7 +350,7 @@ export default function DemoPage() {
 
                 <div>
                   <div className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-2 px-1">Today</div>
-                  <SkeletonSection name="calendar" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                  <SkeletonSection name="calendar" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                     fixture={
                       <div className="space-y-1.5">
                         {calendarEvents.map((e) => (
@@ -366,7 +375,7 @@ export default function DemoPage() {
 
                 <div>
                   <div className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-2 px-1">Chat</div>
-                  <SkeletonSection name="chat" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                  <SkeletonSection name="chat" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                     fixture={
                       <div className="space-y-1.5 bg-stone-50 rounded-lg p-2">
                         {chatMessages.map((m, i) => (
@@ -401,7 +410,7 @@ export default function DemoPage() {
               {/* ── Main content area ── */}
               <div className="flex-1 overflow-hidden p-4 space-y-3">
                 {/* Stats row */}
-                <SkeletonSection name="dashboard-stats" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                <SkeletonSection name="dashboard-stats" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                   fixture={
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
                       {[
@@ -446,7 +455,7 @@ export default function DemoPage() {
                   <div className="bg-white rounded-xl border border-stone-200 p-3">
                     <div className="text-[11px] font-semibold text-stone-700 mb-1">Traffic (7d)</div>
                     <div className="text-[9px] text-stone-400 mb-2">Requests per second</div>
-                    <SkeletonSection name="chart-traffic" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                    <SkeletonSection name="chart-traffic" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                       fixture={
                         <svg viewBox="0 0 160 40" className="w-full h-[40px]">
                           <rect x="0" y="10" width="160" height="30" fill="#e0e0e0" rx="4" />
@@ -471,7 +480,7 @@ export default function DemoPage() {
                   <div className="bg-white rounded-xl border border-stone-200 p-3">
                     <div className="text-[11px] font-semibold text-stone-700 mb-1">Deploys (12w)</div>
                     <div className="text-[9px] text-stone-400 mb-2">Per week</div>
-                    <SkeletonSection name="chart-deploys" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                    <SkeletonSection name="chart-deploys" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                       fixture={
                         <div className="flex items-end gap-[2px] h-[40px]">
                           {barData.map((h, i) => (
@@ -491,7 +500,7 @@ export default function DemoPage() {
                   <div className="bg-white rounded-xl border border-stone-200 p-3">
                     <div className="text-[11px] font-semibold text-stone-700 mb-1">Traffic Split</div>
                     <div className="text-[9px] text-stone-400 mb-2">By client type</div>
-                    <SkeletonSection name="chart-split" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                    <SkeletonSection name="chart-split" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                       fixture={
                         <div className="flex items-center gap-3">
                           <div className="w-[44px] h-[44px] rounded-full bg-stone-200 shrink-0" />
@@ -558,7 +567,7 @@ export default function DemoPage() {
                         </tr>
                       </thead>
                     </table>
-                    <SkeletonSection name="user-table" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                    <SkeletonSection name="user-table" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                       fixture={
                         <table className="w-full text-[10px]">
                           <tbody>
@@ -610,7 +619,7 @@ export default function DemoPage() {
                       <span className="text-[11px] font-semibold text-stone-700">Activity Feed</span>
                       <button className="text-[10px] text-stone-600 font-medium">View all</button>
                     </div>
-                    <SkeletonSection name="activity" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                    <SkeletonSection name="activity" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                       fixture={
                         <div className="divide-y divide-stone-50">
                           {notifications.map((n, i) => (
@@ -652,7 +661,7 @@ export default function DemoPage() {
                       <Button variant="ghost" size="sm" className="text-[10px] h-6 px-2 text-stone-600">+ New</Button>
                     </div>
                   </div>
-                  <SkeletonSection name="kanban" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                  <SkeletonSection name="kanban" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                     fixture={
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {kanbanColumns.map((col) => (
@@ -713,7 +722,7 @@ export default function DemoPage() {
                       <span className="text-[11px] font-semibold text-stone-700">Recent Files</span>
                       <button className="text-[10px] text-stone-600 font-medium">Browse all</button>
                     </div>
-                    <SkeletonSection name="files" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                    <SkeletonSection name="files" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                       fixture={
                         <div className="divide-y divide-stone-50">
                           {recentFiles.map((f) => (
@@ -753,7 +762,7 @@ export default function DemoPage() {
                   <div className="flex flex-col gap-2.5">
                     <div className="bg-white rounded-xl border border-stone-200 p-3">
                       <div className="text-[11px] font-semibold text-stone-700 mb-2.5">Sprint Progress</div>
-                      <SkeletonSection name="progress" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                      <SkeletonSection name="progress" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                         fixture={
                           <div className="space-y-2">
                             {[
@@ -798,7 +807,7 @@ export default function DemoPage() {
 
                     <div className="bg-white rounded-xl border border-stone-200 p-3">
                       <div className="text-[11px] font-semibold text-stone-700 mb-2">Server Status</div>
-                      <SkeletonSection name="servers" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}
+                      <SkeletonSection name="servers" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}
                         fixture={
                           <div className="grid grid-cols-2 gap-1.5">
                             {[
@@ -846,7 +855,7 @@ export default function DemoPage() {
         <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 space-y-3">
           {/* User profile card */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-profile" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-profile" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div className="flex flex-col items-center text-center">
                 <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect fill='%23a8a29e' width='64' height='64' rx='32'/%3E%3C/svg%3E" alt="" className="w-16 h-16 rounded-full mb-3" />
                 <div className="text-[14px] font-bold text-stone-800 w-fit">Sarah Chen</div>
@@ -866,7 +875,7 @@ export default function DemoPage() {
 
           {/* Pricing card */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-pricing" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-pricing" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div>
                 <div className="text-[10px] font-semibold text-indigo-600 uppercase tracking-wider mb-1 w-fit">Pro Plan</div>
                 <div className="flex items-baseline gap-1 mb-3">
@@ -888,7 +897,7 @@ export default function DemoPage() {
 
           {/* Notification list */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-notifications" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-notifications" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div className="space-y-3">
                 <div className="text-[12px] font-semibold text-stone-700 w-fit">Notifications</div>
                 {[
@@ -912,7 +921,7 @@ export default function DemoPage() {
 
           {/* Settings form */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-form" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-form" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div className="space-y-3">
                 <div className="text-[12px] font-semibold text-stone-700 w-fit">Account Settings</div>
                 <div>
@@ -937,7 +946,7 @@ export default function DemoPage() {
 
           {/* Media gallery */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-gallery" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-gallery" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div>
                 <div className="text-[12px] font-semibold text-stone-700 mb-2 w-fit">Media Gallery</div>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -955,7 +964,7 @@ export default function DemoPage() {
 
           {/* Timeline */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-timeline" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-timeline" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div>
                 <div className="text-[12px] font-semibold text-stone-700 mb-3 w-fit">Recent Activity</div>
                 <div className="space-y-3 relative">
@@ -981,7 +990,7 @@ export default function DemoPage() {
 
           {/* Comment thread */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-comments" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-comments" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div className="space-y-3">
                 <div className="text-[12px] font-semibold text-stone-700 w-fit">Discussion</div>
                 {[
@@ -1010,7 +1019,7 @@ export default function DemoPage() {
 
           {/* Tag cloud / badges */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-tags" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-tags" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div>
                 <div className="text-[12px] font-semibold text-stone-700 mb-2 w-fit">Popular Tags</div>
                 <div className="flex flex-wrap gap-1.5">
@@ -1024,7 +1033,7 @@ export default function DemoPage() {
 
           {/* Music player */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-player" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-player" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div className="flex gap-3 items-center">
                 <div className="w-12 h-12 rounded-lg bg-stone-300 shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -1045,7 +1054,7 @@ export default function DemoPage() {
 
           {/* Metric cards row */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-metrics" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-metrics" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { label: "Uptime", value: "99.9%", sub: "Last 30 days" },
@@ -1064,7 +1073,7 @@ export default function DemoPage() {
 
           {/* Breadcrumb + search */}
           <div className="bg-white rounded-xl border border-stone-200 p-4 break-inside-avoid">
-            <SkeletonSection name="test-nav" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} color="#d6d3d1" dark={dark} animate={texture}>
+            <SkeletonSection name="test-nav" loading={effectiveLoading} bones={bones} setRef={setRef} stagger={staggerVal} transition={transitionVal} dark={dark} animate={texture}>
               <div className="space-y-3">
                 <div className="flex items-center gap-1.5 text-[10px] text-stone-400">
                   <span>Home</span><span>/</span><span>Projects</span><span>/</span><span className="text-stone-700 font-medium">Dashboard</span>

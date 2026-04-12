@@ -139,7 +139,8 @@ describe('Vue Skeleton component', () => {
         color: '#000000',
       })
       expect(html).toContain('#000000')
-      expect(html).toContain('background-color: #737373')
+      // Container bone (c=true) is lightened by CONTAINER.adjustment (0.12)
+      expect(html).toContain('background-color: #1f1f1f')
     })
 
     it('applies string radius values', async () => {

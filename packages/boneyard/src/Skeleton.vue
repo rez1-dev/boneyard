@@ -1,6 +1,6 @@
 <script lang="ts">
 import { normalizeBone } from './types.js'
-import type { Bone, AnyBone, SkeletonResult, ResponsiveBones, SnapshotConfig } from './types.js'
+import type { Bone, AnyBone, SkeletonResult, ResponsiveBones, SnapshotConfig, AnimationStyle } from './types.js'
 import {
   adjustColor,
   ensureBuildSnapshotHook,
@@ -8,11 +8,14 @@ import {
   isBuildMode,
   registerBones,
   resolveResponsive,
+  SHIMMER,
+  PULSE,
+  CONTAINER,
+  DEFAULTS,
 } from './shared.js'
 
 export { registerBones }
-
-export type AnimationStyle = 'pulse' | 'shimmer' | 'solid' | boolean
+export type { AnimationStyle }
 
 interface BoneyardConfig {
   color?: string
@@ -73,8 +76,8 @@ const animationStyle = computed<'pulse' | 'shimmer' | 'solid'>(() => {
 
 const resolvedColor = computed(() =>
   isDark.value
-    ? (props.darkColor ?? _globalConfig.darkColor ?? 'rgba(255,255,255,0.06)')
-    : (props.color ?? _globalConfig.color ?? 'rgba(0,0,0,0.08)')
+    ? (props.darkColor ?? _globalConfig.darkColor ?? DEFAULTS.web.dark)
+    : (props.color ?? _globalConfig.color ?? DEFAULTS.web.light)
 )
 
 const serializedSnapshotConfig = computed(() =>
@@ -138,13 +141,14 @@ const scaleY = computed(() =>
 )
 
 const pulseColor = computed(() =>
-  adjustColor(resolvedColor.value, isDark.value ? 0.04 : 0.3)
+  adjustColor(resolvedColor.value, isDark.value ? PULSE.darkAdjust : PULSE.lightAdjust)
 )
 
 function updateDarkMode() {
   if (typeof window === 'undefined') return
   try {
-    isDark.value =
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    isDark.value = mq.matches ||
       document.documentElement.classList.contains('dark') ||
       !!containerRef.value?.closest('.dark')
   } catch {
@@ -159,24 +163,27 @@ function sanitizeRadius(r: number | string): string {
   return '0px'
 }
 
-function getBoneStyle(raw: AnyBone, scale: number, color: string, dark: boolean, index: number = 0) {
+function getBoneStyle(raw: AnyBone, scale: number, color: string, dark: boolean, index: number = 0, capturedWidth: number = 0) {
   const bone = normalizeBone(raw)
   const radius = sanitizeRadius(bone.r)
-  const boneColor = bone.c ? adjustColor(color, dark ? 0.03 : 0.45) : color
+  const boneColor = color
+  const capturedPxW = (bone.w / 100) * capturedWidth
+  const isCircle = bone.r === '50%' && capturedWidth > 0 && Math.abs(capturedPxW - bone.h) < 4
+  const w = isCircle ? `${bone.h * scale}px` : `${bone.w}%`
   const stagger = staggerMs.value > 0
     ? `opacity:0;animation:by-${uid} 0.3s ease-out ${index * staggerMs.value}ms forwards;`
     : ''
-  return `position:absolute;left:${bone.x}%;top:${bone.y * scale}px;width:${bone.w}%;height:${bone.h * scale}px;border-radius:${radius};background-color:${boneColor};overflow:hidden;${stagger}`
+  return `position:absolute;left:${bone.x}%;top:${bone.y * scale}px;width:${w};height:${bone.h * scale}px;border-radius:${radius};background-color:${boneColor};overflow:hidden;${stagger}`
 }
 
 function getOverlayStyle(color: string, dark: boolean, anim: 'pulse' | 'shimmer' | 'solid') {
   if (anim === 'solid') return ''
-  const lighterColor = adjustColor(color, dark ? 0.04 : 0.3)
+  const lighterColor = adjustColor(color, dark ? PULSE.darkAdjust : PULSE.lightAdjust)
   if (anim === 'pulse') {
-    return `position:absolute;inset:0;background-color:${lighterColor};animation:bp-${uid} 1.8s ease-in-out infinite;`
+    return `position:absolute;inset:0;background-color:${lighterColor};animation:bp-${uid} ${PULSE.speed} ease-in-out infinite;`
   }
   if (anim === 'shimmer') {
-    return `position:absolute;inset:0;background:linear-gradient(90deg, transparent 30%, ${lighterColor} 50%, transparent 70%);background-size:200% 100%;animation:bs-${uid} 2.4s linear infinite;`
+    return `position:absolute;inset:0;background:linear-gradient(${SHIMMER.angle}deg, transparent ${SHIMMER.start}%, ${lighterColor} 50%, transparent ${SHIMMER.end}%);background-size:200% 100%;animation:bs-${uid} ${SHIMMER.speed} linear infinite;`
   }
   return ''
 }
@@ -265,11 +272,11 @@ onUnmounted(() => {
     >
       <div style="position:relative;width:100%;height:100%;">
         <div
-          v-for="(bone, i) in activeBones.bones"
+          v-for="(bone, i) in (activeBones.bones as AnyBone[]).filter(b => !normalizeBone(b).c)"
           :key="`${i}-${(bone as any).x ?? (bone as any)[0]}`"
           data-boneyard-bone="true"
           :class="resolvedBoneClass"
-          :style="getBoneStyle(bone, scaleY, resolvedColor, isDark, i)"
+          :style="getBoneStyle(bone, scaleY, resolvedColor, isDark, i, activeBones?.width ?? 0)"
         >
           <div
             v-if="animationStyle !== 'solid'"

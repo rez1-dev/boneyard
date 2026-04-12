@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useRef, useState, useEffect } from 'react';
 import { normalizeBone } from './types.js';
-import { adjustColor, ensureBuildSnapshotHook, getRegisteredBones, isBuildMode, registerBones, resolveResponsive, } from './shared.js';
+import { adjustColor, ensureBuildSnapshotHook, getRegisteredBones, isBuildMode, registerBones, resolveResponsive, SHIMMER, PULSE, DEFAULTS, } from './shared.js';
 ensureBuildSnapshotHook();
 export { registerBones };
 let globalConfig = {};
@@ -43,7 +43,7 @@ export function Skeleton({ loading, children, name, initialBones, color, darkCol
             const mq = window.matchMedia('(prefers-color-scheme: dark)');
             const hasDarkClass = document.documentElement.classList.contains('dark') ||
                 !!containerRef.current?.closest('.dark');
-            setIsDark(hasDarkClass);
+            setIsDark(mq.matches || hasDarkClass);
         };
         checkDark();
         const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -57,8 +57,8 @@ export function Skeleton({ loading, children, name, initialBones, color, darkCol
             mo.disconnect();
         };
     }, []);
-    const effectiveColor = color ?? globalConfig.color ?? 'rgba(0,0,0,0.08)';
-    const effectiveDarkColor = darkColor ?? globalConfig.darkColor ?? 'rgba(255,255,255,0.06)';
+    const effectiveColor = color ?? globalConfig.color ?? DEFAULTS.web.light;
+    const effectiveDarkColor = darkColor ?? globalConfig.darkColor ?? DEFAULTS.web.dark;
     const resolvedColor = isDark ? effectiveDarkColor : effectiveColor;
     const rawAnimate = animate ?? globalConfig.animate ?? 'pulse';
     const animationStyle = rawAnimate === true ? 'pulse' :
@@ -133,37 +133,43 @@ export function Skeleton({ loading, children, name, initialBones, color, darkCol
     }, [loading, transitionMs, activeBones]);
     const showSkeleton = (loading || transitioning) && activeBones;
     const showFallback = loading && !activeBones && !transitioning;
-    // Use captured height directly — no vertical scaling to avoid distortion
+    // Scale vertical positions to match actual container height
+    const effectiveHeight = containerHeight > 0 ? containerHeight : activeBones?.height ?? 0;
+    const capturedHeight = activeBones?.height ?? 0;
+    const scaleY = (effectiveHeight > 0 && capturedHeight > 0) ? effectiveHeight / capturedHeight : 1;
     return (_jsxs("div", { ref: containerRef, className: className, style: { position: 'relative' }, ...dataAttrs, children: [_jsx("div", { "data-boneyard-content": "true", style: showSkeleton && !transitioning ? { visibility: 'hidden' } : undefined, children: showFallback ? fallback : children }), showSkeleton && (_jsx("div", { "data-boneyard-overlay": "true", style: {
                     position: 'absolute', inset: 0, overflow: 'hidden',
                     opacity: transitioning ? 0 : 1,
                     transition: transitionMs > 0 ? `opacity ${transitionMs}ms ease-out` : undefined,
-                }, children: _jsxs("div", { style: { position: 'relative', width: '100%', height: '100%' }, children: [activeBones.bones.map((raw, i) => {
+                }, children: _jsxs("div", { style: { position: 'relative', width: '100%', height: '100%' }, children: [activeBones.bones.filter(raw => !normalizeBone(raw).c).map((raw, i) => {
                             const b = normalizeBone(raw);
-                            const boneColor = b.c ? adjustColor(resolvedColor, isDark ? 0.03 : 0.45) : resolvedColor;
-                            const lighterColor = adjustColor(resolvedColor, isDark ? 0.04 : 0.3);
+                            const boneColor = resolvedColor;
+                            const lighterColor = adjustColor(resolvedColor, isDark ? PULSE.darkAdjust : PULSE.lightAdjust);
+                            const capturedPxW = (b.w / 100) * (activeBones.width ?? 0);
+                            const isCircle = b.r === '50%' && Math.abs(capturedPxW - b.h) < 4;
                             const boneStyle = {
                                 position: 'absolute',
                                 left: `${b.x}%`,
-                                top: b.y,
-                                width: `${b.w}%`,
-                                height: b.h,
+                                top: b.y * scaleY,
+                                width: isCircle ? b.h * scaleY : `${b.w}%`,
+                                height: b.h * scaleY,
                                 borderRadius: typeof b.r === 'string' ? b.r : `${b.r}px`,
                                 backgroundColor: boneColor,
                             };
                             if (animationStyle === 'pulse') {
-                                boneStyle.animation = `bp-${uid} 1.8s ease-in-out infinite`;
+                                boneStyle.animation = `bp-${uid} ${PULSE.speed} ease-in-out infinite`;
                             }
                             else if (animationStyle === 'shimmer') {
-                                const shimmerHighlight = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.1)';
-                                boneStyle.background = `linear-gradient(110deg, ${boneColor} 47%, ${shimmerHighlight} 50%, ${boneColor} 53%)`;
+                                const shimmerHighlight = isDark ? SHIMMER.darkHighlight : SHIMMER.lightHighlight;
+                                delete boneStyle.backgroundColor;
+                                boneStyle.backgroundImage = `linear-gradient(${SHIMMER.angle}deg, ${boneColor} ${SHIMMER.start}%, ${shimmerHighlight} 50%, ${boneColor} ${SHIMMER.end}%)`;
                                 boneStyle.backgroundSize = '200% 100%';
-                                boneStyle.animation = `bs-${uid} 1.6s linear infinite`;
+                                boneStyle.animation = `bs-${uid} ${SHIMMER.speed} linear infinite`;
                             }
                             if (staggerMs > 0) {
                                 boneStyle.opacity = 0;
                                 boneStyle.animation = `${boneStyle.animation ? boneStyle.animation + ',' : ''} by-${uid} 0.3s ease-out ${i * staggerMs}ms forwards`;
                             }
                             return _jsx("div", { "data-boneyard-bone": "true", className: resolvedBoneClass, style: boneStyle }, i);
-                        }), animationStyle === 'pulse' && (_jsx("style", { children: `@keyframes bp-${uid}{0%,100%{background-color:${resolvedColor}}50%{background-color:${adjustColor(resolvedColor, isDark ? 0.04 : 0.3)}}}` })), animationStyle === 'shimmer' && (_jsx("style", { children: `@keyframes bs-${uid}{0%{background-position:200% 0}100%{background-position:-200% 0}}` })), staggerMs > 0 && (_jsx("style", { children: `@keyframes by-${uid}{from{opacity:0}to{opacity:1}}` }))] }) }))] }));
+                        }), animationStyle === 'pulse' && (_jsx("style", { children: `@keyframes bp-${uid}{0%,100%{background-color:${resolvedColor}}50%{background-color:${adjustColor(resolvedColor, isDark ? PULSE.darkAdjust : PULSE.lightAdjust)}}}` })), animationStyle === 'shimmer' && (_jsx("style", { children: `@keyframes bs-${uid}{0%{background-position:200% 0}100%{background-position:-200% 0}}` })), staggerMs > 0 && (_jsx("style", { children: `@keyframes by-${uid}{from{opacity:0}to{opacity:1}}` }))] }) }))] }));
 }

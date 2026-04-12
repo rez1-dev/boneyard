@@ -2,7 +2,7 @@
 import { useRef, useState, useEffect } from 'preact/hooks'
 import type { ComponentChildren } from 'preact'
 import { normalizeBone } from './types.js'
-import type { AnyBone, SkeletonResult, ResponsiveBones, SnapshotConfig } from './types.js'
+import type { AnyBone, SkeletonResult, ResponsiveBones, SnapshotConfig, AnimationStyle } from './types.js'
 import {
   adjustColor,
   ensureBuildSnapshotHook,
@@ -10,14 +10,16 @@ import {
   isBuildMode,
   registerBones,
   resolveResponsive,
+  SHIMMER,
+  PULSE,
+  CONTAINER,
+  DEFAULTS,
 } from './shared.js'
 
 ensureBuildSnapshotHook()
 
 export { registerBones }
-
-// ── Global defaults ─────────────────────────────────────────────────────────
-export type AnimationStyle = 'pulse' | 'shimmer' | 'solid' | boolean
+export type { AnimationStyle }
 
 interface BoneyardConfig {
   color?: string
@@ -126,9 +128,10 @@ export function Skeleton({
   useEffect(() => {
     if (typeof window === 'undefined') return
     const checkDark = () => {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)')
       const hasDarkClass = document.documentElement.classList.contains('dark') ||
         !!containerRef.current?.closest('.dark')
-      setIsDark(hasDarkClass)
+      setIsDark(mq.matches || hasDarkClass)
     }
     checkDark()
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
@@ -143,8 +146,8 @@ export function Skeleton({
     }
   }, [])
 
-  const effectiveColor = color ?? globalConfig.color ?? 'rgba(0,0,0,0.08)'
-  const effectiveDarkColor = darkColor ?? globalConfig.darkColor ?? 'rgba(255,255,255,0.06)'
+  const effectiveColor = color ?? globalConfig.color ?? DEFAULTS.web.light
+  const effectiveDarkColor = darkColor ?? globalConfig.darkColor ?? DEFAULTS.web.dark
   const resolvedColor = isDark ? effectiveDarkColor : effectiveColor
   const rawAnimate = animate ?? globalConfig.animate ?? 'pulse'
   const animationStyle: 'pulse' | 'shimmer' | 'solid' =
@@ -244,25 +247,29 @@ export function Skeleton({
           transition: transitionMs > 0 ? `opacity ${transitionMs}ms ease-out` : undefined,
         }}>
           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-            {(activeBones.bones as AnyBone[]).map((raw, i) => {
+            {(activeBones.bones as AnyBone[]).filter(raw => !normalizeBone(raw).c).map((raw, i) => {
               const b = normalizeBone(raw)
-              const boneColor = b.c ? adjustColor(resolvedColor, isDark ? 0.03 : 0.45) : resolvedColor
-              const lighterColor = adjustColor(resolvedColor, isDark ? 0.04 : 0.3)
+              const boneColor = resolvedColor
+              const lighterColor = adjustColor(resolvedColor, isDark ? PULSE.darkAdjust : PULSE.lightAdjust)
+              const capturedPxW = (b.w / 100) * (activeBones.width ?? 0)
+              const isCircle = b.r === '50%' && Math.abs(capturedPxW - b.h) < 4
               const boneStyle: Record<string, any> = {
                 position: 'absolute',
                 left: `${b.x}%`,
                 top: b.y * scaleY,
-                width: `${b.w}%`,
+                width: isCircle ? b.h * scaleY : `${b.w}%`,
                 height: b.h * scaleY,
                 borderRadius: typeof b.r === 'string' ? b.r : `${b.r}px`,
                 backgroundColor: boneColor,
               }
               if (animationStyle === 'pulse') {
-                boneStyle.animation = `bp-${uid} 1.8s ease-in-out infinite`
+                boneStyle.animation = `bp-${uid} ${PULSE.speed} ease-in-out infinite`
               } else if (animationStyle === 'shimmer') {
-                boneStyle.background = `linear-gradient(90deg, ${boneColor} 30%, ${lighterColor} 50%, ${boneColor} 70%)`
+                const shimmerHighlight = isDark ? SHIMMER.darkHighlight : SHIMMER.lightHighlight
+                delete boneStyle.backgroundColor
+                boneStyle.backgroundImage = `linear-gradient(${SHIMMER.angle}deg, ${boneColor} ${SHIMMER.start}%, ${shimmerHighlight} 50%, ${boneColor} ${SHIMMER.end}%)`
                 boneStyle.backgroundSize = '200% 100%'
-                boneStyle.animation = `bs-${uid} 2.4s linear infinite`
+                boneStyle.animation = `bs-${uid} ${SHIMMER.speed} linear infinite`
               }
               if (staggerMs > 0) {
                 boneStyle.opacity = 0
@@ -271,7 +278,7 @@ export function Skeleton({
               return <div key={i} data-boneyard-bone="true" className={resolvedBoneClass} style={boneStyle} />
             })}
             {animationStyle === 'pulse' && (
-              <style>{`@keyframes bp-${uid}{0%,100%{background-color:${resolvedColor}}50%{background-color:${adjustColor(resolvedColor, isDark ? 0.04 : 0.3)}}}`}</style>
+              <style>{`@keyframes bp-${uid}{0%,100%{background-color:${resolvedColor}}50%{background-color:${adjustColor(resolvedColor, isDark ? PULSE.darkAdjust : PULSE.lightAdjust)}}}`}</style>
             )}
             {animationStyle === 'shimmer' && (
               <style>{`@keyframes bs-${uid}{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>

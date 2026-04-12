@@ -51,7 +51,7 @@ describe('renderBones', () => {
     }
     const html = renderBones(skel)
     expect(html).toContain('boneyard-pulse')
-    expect(html).toContain('background-color:#e0e0e0')
+    expect(html).toContain('background-color:#f0f0f0')
   })
 
   it('no animation when disabled', () => {
@@ -59,7 +59,7 @@ describe('renderBones', () => {
       name: 'x', viewportWidth: 100, width: 100, height: 100,
       bones: [{ x: 0, y: 0, w: 100, h: 100, r: 4 }],
     }
-    const html = renderBones(skel, '#e0e0e0', false)
+    const html = renderBones(skel, '#f0f0f0', false)
     expect(html).not.toContain('animation')
   })
 

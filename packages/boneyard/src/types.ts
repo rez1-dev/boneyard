@@ -183,3 +183,5 @@ export type ResponsiveDescriptor = Record<number, SkeletonDescriptor>
 export interface ResponsiveBones {
   breakpoints: Record<number, SkeletonResult>
 }
+
+export type AnimationStyle = 'pulse' | 'shimmer' | 'solid' | boolean

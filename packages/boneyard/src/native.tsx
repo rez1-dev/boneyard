@@ -19,10 +19,17 @@ import {
   type LayoutChangeEvent,
 } from 'react-native'
 import { normalizeBone } from './types.js'
-import type { AnyBone, Bone, SkeletonResult, ResponsiveBones } from './types.js'
+import type { AnyBone, Bone, SkeletonResult, ResponsiveBones, AnimationStyle } from './types.js'
+import {
+  adjustColor,
+  resolveResponsive as sharedResolveResponsive,
+  DEFAULTS,
+  NATIVE_SHIMMER,
+  PULSE,
+  CONTAINER,
+} from './shared.js'
 
-// ── Global defaults ─────────────────────────────────────────────────────────
-export type AnimationStyle = 'pulse' | 'shimmer' | 'solid' | boolean
+export type { AnimationStyle }
 
 interface BoneyardConfig {
   color?: string
@@ -51,33 +58,7 @@ export function registerBones(map: Record<string, SkeletonResult | ResponsiveBon
   }
 }
 
-/** Pick the right SkeletonResult from a responsive set for the current width */
-function resolveResponsive(
-  bones: SkeletonResult | ResponsiveBones,
-  width: number,
-): SkeletonResult | null {
-  if (!('breakpoints' in bones)) return bones
-  const bps = Object.keys(bones.breakpoints).map(Number).sort((a, b) => a - b)
-  if (bps.length === 0) return null
-  const match = [...bps].reverse().find(bp => width >= bp) ?? bps[0]
-  return bones.breakpoints[match] ?? null
-}
-
-/** Lighten/adjust a hex color toward white by `amount` (0–1) */
-function adjustColor(color: string, amount: number): string {
-  if (color.startsWith('#') && color.length >= 7) {
-    const r = parseInt(color.slice(1, 3), 16)
-    const g = parseInt(color.slice(3, 5), 16)
-    const b = parseInt(color.slice(5, 7), 16)
-    if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
-      const nr = Math.round(r + (255 - r) * amount)
-      const ng = Math.round(g + (255 - g) * amount)
-      const nb = Math.round(b + (255 - b) * amount)
-      return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`
-    }
-  }
-  return color
-}
+const resolveResponsive = sharedResolveResponsive
 
 // ── Animations ──────────────────────────────────────────────────────────────
 
@@ -125,7 +106,7 @@ function useShimmerAnimation(enabled: boolean): Animated.Value {
     const loop = Animated.loop(
       Animated.timing(anim, {
         toValue: 1,
-        duration: 2400,
+        duration: NATIVE_SHIMMER.speed,
         easing: Easing.linear,
         useNativeDriver: true,
       }),
@@ -435,7 +416,7 @@ export interface SkeletonProps {
   children: ReactNode
   name?: string
   initialBones?: SkeletonResult | ResponsiveBones
-  /** Bone color (default: '#d4d4d4'). Used when prefers-color-scheme is light. */
+  /** Bone color (default: '#ebebeb'). Used when prefers-color-scheme is light. */
   color?: string
   /** Bone color for dark mode (default: '#3a3a3c'). */
   darkColor?: string
@@ -474,8 +455,8 @@ export function Skeleton({
   const hasScanned = useRef(false)
   const { width: screenWidth, fontScale } = useWindowDimensions()
 
-  const effectiveColor = color ?? globalConfig.color ?? (isDark ? '#3a3a3c' : '#d4d4d4')
-  const effectiveDarkColor = darkColor ?? globalConfig.darkColor ?? '#3a3a3c'
+  const effectiveColor = color ?? globalConfig.color ?? (isDark ? DEFAULTS.native.dark : DEFAULTS.native.light)
+  const effectiveDarkColor = darkColor ?? globalConfig.darkColor ?? DEFAULTS.native.dark
   const resolvedColor = isDark ? effectiveDarkColor : effectiveColor
 
   const rawAnimate = animate ?? globalConfig.animate ?? 'pulse'
@@ -557,7 +538,7 @@ export function Skeleton({
 
       {showSkeleton && (
         <Animated.View style={[StyleSheet.absoluteFill, { opacity: transitioning ? fadeAnim : 1 }]}>
-          {activeBones.bones.map((raw: AnyBone, i: number) => {
+          {(activeBones.bones as AnyBone[]).filter(raw => !normalizeBone(raw).c).map((raw: AnyBone, i: number) => {
             const b = normalizeBone(raw)
             const borderRadius = typeof b.r === 'number'
               ? b.r
@@ -568,10 +549,8 @@ export function Skeleton({
                   ) / 2
                 : (parseFloat(b.r) || 0)
 
-            const boneColor = b.c
-              ? adjustColor(resolvedColor, isDark ? 0.03 : 0.45)
-              : resolvedColor
-            const lighterColor = adjustColor(resolvedColor, isDark ? 0.04 : 0.3)
+            const boneColor = resolvedColor
+            const lighterColor = adjustColor(resolvedColor, isDark ? PULSE.darkAdjust : PULSE.lightAdjust)
 
             const boneWidth = containerWidth > 0 ? (b.w / 100) * containerWidth : 100
             const useStagger = staggerMs > 0 && staggerAnims[i]
@@ -606,13 +585,13 @@ export function Skeleton({
                       position: 'absolute',
                       top: 0,
                       bottom: 0,
-                      width: boneWidth * 0.4,
+                      width: boneWidth * NATIVE_SHIMMER.widthFraction,
                       backgroundColor: lighterColor,
-                      opacity: 0.6,
+                      opacity: NATIVE_SHIMMER.opacity,
                       transform: [{
                         translateX: shimmerAnim.interpolate({
                           inputRange: [0, 0.5, 1],
-                          outputRange: [-boneWidth * 0.4, boneWidth, boneWidth],
+                          outputRange: [-boneWidth * NATIVE_SHIMMER.widthFraction, boneWidth, boneWidth],
                         }),
                       }],
                     }}

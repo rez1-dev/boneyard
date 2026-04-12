@@ -1,20 +1,21 @@
 "use client";
 
+import { useRef, useState, useCallback } from "react";
 import { Skeleton } from "boneyard-js/react";
 import { BrowserMockup } from "@/components/browser-mockup";
 import { CodeBlock } from "@/components/ui/code-block";
 import { TableOfContents } from "@/components/toc";
 
 const tocItems = [
+  { id: "try-it", label: "Try it" },
+  { id: "same-component-all-breakpoints", label: "All breakpoints" },
   { id: "how-it-works", label: "How it works" },
-  { id: "same-component-different-breakpoints", label: "Same component, different breakpoints" },
   { id: "what-the-json-looks-like", label: "What the JSON looks like" },
   { id: "custom-breakpoints", label: "Custom breakpoints" },
   { id: "how-breakpoint-selection-works", label: "How breakpoint selection works" },
 ];
 
 // ── Example component that changes layout at different widths ──
-// Uses a width prop to simulate responsive behavior at different breakpoints
 
 function ProductCard({ layout }: { layout: "mobile" | "tablet" | "desktop" }) {
   if (layout === "mobile") {
@@ -66,13 +67,112 @@ function ProductCard({ layout }: { layout: "mobile" | "tablet" | "desktop" }) {
   );
 }
 
-// ── Skeleton preview using the actual <Skeleton> component ──
+// ── Breakpoints for the indicator ──
+// These match the keys in responsive-product.bones.json (container-width breakpoints)
+const BREAKPOINTS = [220, 400, 640];
 
-function SkeletonPreview({ children, name }: { children: React.ReactNode; name?: string }) {
+function getActiveBreakpoint(width: number): number {
+  return [...BREAKPOINTS].reverse().find((bp) => width >= bp) ?? BREAKPOINTS[0];
+}
+
+function getBreakpointLabel(bp: number): string {
+  if (bp >= 640) return "desktop";
+  if (bp >= 400) return "tablet";
+  return "mobile";
+}
+
+// ── Resizable demo ──
+
+function ResizableDemo() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(680);
+  const [dragging, setDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, startWidth: 0 });
+
+  const MIN_WIDTH = 180;
+  const MAX_WIDTH = 680;
+
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      e.preventDefault();
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      dragStartRef.current = { x: e.clientX, startWidth: width };
+      setDragging(true);
+    },
+    [width]
+  );
+
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragging) return;
+      const dx = e.clientX - dragStartRef.current.x;
+      const next = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, dragStartRef.current.startWidth + dx));
+      setWidth(next);
+    },
+    [dragging]
+  );
+
+  const onPointerUp = useCallback(() => {
+    setDragging(false);
+  }, []);
+
+  const activeBp = getActiveBreakpoint(width);
+  const label = getBreakpointLabel(activeBp);
+
   return (
-    <Skeleton name={name} loading={true} animate="shimmer">
-      {children}
-    </Skeleton>
+    <div>
+      {/* Width indicator */}
+      <div className="flex items-center gap-3 mb-3">
+        <span className="text-[12px] font-mono text-stone-400">
+          {Math.round(width)}px
+        </span>
+        <div className="flex gap-1.5">
+          {BREAKPOINTS.map((bp) => (
+            <span
+              key={bp}
+              className={`text-[11px] px-2 py-0.5 rounded-full font-mono transition-colors ${
+                bp === activeBp
+                  ? "bg-stone-900 text-white"
+                  : "bg-stone-100 text-stone-400"
+              }`}
+            >
+              {getBreakpointLabel(bp)}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Resizable container */}
+      <div
+        className="relative"
+        style={{ width, maxWidth: "100%" }}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+      >
+        <BrowserMockup url="my-app.com/products">
+          <div ref={containerRef}>
+            <Skeleton name="responsive-product" loading={true} animate="shimmer">
+              <ProductCard layout={label as "mobile" | "tablet" | "desktop"} />
+            </Skeleton>
+          </div>
+        </BrowserMockup>
+
+        {/* Drag handle */}
+        <div
+          className="absolute top-0 -right-3 w-6 h-full flex items-center justify-center cursor-ew-resize z-10 select-none"
+          onPointerDown={onPointerDown}
+        >
+          <div
+            className={`w-1.5 h-10 rounded-full transition-colors ${
+              dragging ? "bg-stone-500" : "bg-stone-300"
+            }`}
+          />
+        </div>
+      </div>
+      <p className="text-[12px] text-stone-400 mt-2">
+        Drag the handle to resize. The skeleton auto-switches at each breakpoint.
+      </p>
+    </div>
   );
 }
 
@@ -81,158 +181,177 @@ function SkeletonPreview({ children, name }: { children: React.ReactNode; name?:
 export default function ResponsivePage() {
   return (
     <>
-    <div className="w-full max-w-[720px] px-6 pt-14 pb-12 space-y-12">
-      {/* Header */}
-      <div>
-        <h1 className="text-[28px] font-bold tracking-tight mb-2">Responsive</h1>
-        <p className="text-[15px] text-[#78716c] leading-relaxed">
-          Boneyard captures your layout at multiple breakpoints automatically. The right skeleton
-          is selected at runtime based on the container width — no media queries, no manual work.
-        </p>
-      </div>
-
-      {/* How it works */}
-      <section>
-        <div className="section-divider" id="how-it-works">
-          <span>How it works</span>
+      <div className="w-full max-w-[720px] px-6 pt-14 pb-12 space-y-12">
+        {/* Header */}
+        <div>
+          <h1 className="text-[28px] font-bold tracking-tight mb-2">Responsive</h1>
+          <p className="text-[15px] text-[#78716c] leading-relaxed">
+            Boneyard captures your layout at multiple breakpoints automatically. One{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">&lt;Skeleton&gt;</code>{" "}
+            component, one{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">.bones.json</code>{" "}
+            file — the right skeleton is selected at runtime based on the container width.
+          </p>
         </div>
-        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          When you run{" "}
-          <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">npx boneyard-js build</code>,
-          Playwright visits your page at multiple breakpoints and snapshots the DOM at each one.
-          If you have Tailwind, it auto-detects your breakpoints — <strong className="text-stone-600">375, 640, 768, 1024, 1280, 1536px</strong>.
-          Without Tailwind, it falls back to 375, 768, 1280px. All breakpoints are stored
-          in a single{" "}
-          <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">.bones.json</code> file.
-        </p>
-        <p className="text-[14px] text-[#78716c] leading-relaxed mb-4">
-          At runtime, the{" "}
-          <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">&lt;Skeleton&gt;</code>{" "}
-          component uses a{" "}
-          <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">ResizeObserver</code>{" "}
-          to measure its container and picks the closest breakpoint. When the window resizes,
-          it swaps to the matching skeleton automatically.
-        </p>
-      </section>
 
-      {/* Breakpoint examples */}
-      <section>
-        <div className="section-divider" id="same-component-different-breakpoints">
-          <span>Same component, different breakpoints</span>
-        </div>
-        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-6">
-          The same product card at mobile, tablet, and desktop widths. Each skeleton
-          matches the actual layout at that size.
-        </p>
+        {/* Interactive demo */}
+        <section>
+          <div className="section-divider" id="try-it">
+            <span>Try it</span>
+          </div>
+          <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-6">
+            This is a single{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">&lt;Skeleton name=&quot;responsive-product&quot;&gt;</code>{" "}
+            component. Resize it and watch it switch between the mobile, tablet, and desktop
+            bone sets automatically.
+          </p>
+          <ResizableDemo />
+        </section>
 
-        <div className="space-y-6">
-          {[
-            { layout: "mobile" as const, label: "375px", tag: "mobile", width: 220 },
-            { layout: "tablet" as const, label: "768px", tag: "tablet", width: 400 },
-            { layout: "desktop" as const, label: "1280px", tag: "desktop", width: undefined },
-          ].map(({ layout, label, tag, width }) => (
-            <div key={label}>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[12px] font-mono text-stone-400">{label}</span>
-                <span className="text-[11px] text-stone-300">{tag}</span>
+        {/* All three breakpoints side-by-side */}
+        <section>
+          <div className="section-divider" id="same-component-all-breakpoints">
+            <span>Same component, all breakpoints</span>
+          </div>
+          <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-6">
+            The same{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">&lt;Skeleton name=&quot;responsive-product&quot;&gt;</code>{" "}
+            at three fixed widths. Each uses the same bones file — the component picks the
+            matching breakpoint based on its container size.
+          </p>
+
+          <div className="space-y-6">
+            {[
+              { label: "220px", tag: "mobile" as const, width: 250 },
+              { label: "400px", tag: "tablet" as const, width: 460 },
+              { label: "640px", tag: "desktop" as const, width: undefined },
+            ].map(({ label, tag, width }) => (
+              <div key={label}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[12px] font-mono text-stone-400">{label}</span>
+                  <span className="text-[11px] text-stone-300">{tag}</span>
+                </div>
+                <div style={width ? { maxWidth: width } : undefined}>
+                  <BrowserMockup url="skeleton">
+                    <Skeleton name="responsive-product" loading={true} animate="shimmer">
+                      <ProductCard layout={tag} />
+                    </Skeleton>
+                  </BrowserMockup>
+                </div>
               </div>
-              <div style={width ? { maxWidth: width } : undefined}>
-                <BrowserMockup url="skeleton">
-                  <SkeletonPreview name={`responsive-${tag}`}>
-                    <ProductCard layout={layout} />
-                  </SkeletonPreview>
-                </BrowserMockup>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
 
-      {/* Output format */}
-      <section>
-        <div className="section-divider" id="what-the-json-looks-like">
-          <span>What the JSON looks like</span>
-        </div>
-        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          Each{" "}
-          <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">.bones.json</code>{" "}
-          file contains all breakpoints in a single object. The{" "}
-          <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">x</code> and{" "}
-          <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">w</code>{" "}
-          values are percentages of the container width, so they scale naturally.
-        </p>
-        <CodeBlock
-          filename="dashboard.bones.json"
-          language="json"
-          code={`{
+        {/* How it works */}
+        <section>
+          <div className="section-divider" id="how-it-works">
+            <span>How it works</span>
+          </div>
+          <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
+            When you run{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">npx boneyard-js build</code>,
+            Playwright visits your page at multiple breakpoints and snapshots the DOM at each one.
+            If you have Tailwind, it auto-detects your breakpoints — <strong className="text-stone-600">375, 640, 768, 1024, 1280, 1536px</strong>.
+            Without Tailwind, it falls back to 375, 768, 1280px. All breakpoints are stored
+            in a single{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">.bones.json</code> file.
+          </p>
+          <p className="text-[14px] text-[#78716c] leading-relaxed mb-4">
+            At runtime, the{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">&lt;Skeleton&gt;</code>{" "}
+            component uses a{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">ResizeObserver</code>{" "}
+            to measure its container and picks the closest breakpoint. When the container resizes,
+            it swaps to the matching skeleton automatically.
+          </p>
+        </section>
+
+        {/* Output format */}
+        <section>
+          <div className="section-divider" id="what-the-json-looks-like">
+            <span>What the JSON looks like</span>
+          </div>
+          <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
+            Each{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">.bones.json</code>{" "}
+            file contains all breakpoints in a single object. The{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">x</code> and{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">w</code>{" "}
+            values are percentages of the container width, so they scale naturally.
+          </p>
+          <CodeBlock
+            filename="responsive-product.bones.json"
+            language="json"
+            code={`{
   <span class="text-[#93c5fd]">"breakpoints"</span>: {
     <span class="text-[#93c5fd]">"375"</span>: {
-      <span class="text-[#93c5fd]">"width"</span>: <span class="text-[#fbbf24]">343</span>,
-      <span class="text-[#93c5fd]">"height"</span>: <span class="text-[#fbbf24]">198</span>,
+      <span class="text-[#93c5fd]">"width"</span>: <span class="text-[#fbbf24]">220</span>,
+      <span class="text-[#93c5fd]">"height"</span>: <span class="text-[#fbbf24]">341</span>,
       <span class="text-[#93c5fd]">"bones"</span>: [
-        [<span class="text-[#fbbf24]">0</span>, <span class="text-[#fbbf24]">0</span>, <span class="text-[#fbbf24]">38.2</span>, <span class="text-[#fbbf24]">17</span>, <span class="text-[#fbbf24]">8</span>],
-        <span class="text-stone-500">// ...</span>
+        [<span class="text-[#fbbf24]">0</span>, <span class="text-[#fbbf24]">0</span>, <span class="text-[#fbbf24]">100</span>, <span class="text-[#fbbf24]">186</span>, <span class="text-[#fbbf24]">6</span>],
+        <span class="text-stone-500">// ... vertical stack</span>
       ]
     },
-    <span class="text-[#93c5fd]">"768"</span>: { <span class="text-stone-500">/* tablet bones */</span> },
-    <span class="text-[#93c5fd]">"1280"</span>: { <span class="text-stone-500">/* desktop bones */</span> }
+    <span class="text-[#93c5fd]">"768"</span>: { <span class="text-stone-500">/* horizontal layout */</span> },
+    <span class="text-[#93c5fd]">"1280"</span>: { <span class="text-stone-500">/* wide layout with button on right */</span> }
   }
 }`}
-        />
-      </section>
+          />
+        </section>
 
-      {/* Custom breakpoints */}
-      <section>
-        <div className="section-divider" id="custom-breakpoints">
-          <span>Custom breakpoints</span>
-        </div>
-        <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
-          Tailwind breakpoints are auto-detected. Without Tailwind, the defaults are 375, 768, 1280.
-          You can override them via{" "}
-          <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">boneyard.config.json</code>{" "}
-          or the CLI flag.
-        </p>
-        <CodeBlock
-          filename="boneyard.config.json"
-          language="json"
-          code={`{
+        {/* Custom breakpoints */}
+        <section>
+          <div className="section-divider" id="custom-breakpoints">
+            <span>Custom breakpoints</span>
+          </div>
+          <p className="text-[14px] text-[#78716c] leading-relaxed mt-4 mb-4">
+            Tailwind breakpoints are auto-detected. Without Tailwind, the defaults are 375, 768, 1280.
+            You can override them via{" "}
+            <code className="text-[12px] bg-stone-100 px-1.5 py-0.5 rounded">boneyard.config.json</code>{" "}
+            or the CLI flag.
+          </p>
+          <CodeBlock
+            filename="boneyard.config.json"
+            language="json"
+            code={`{
   <span class="text-[#93c5fd]">"breakpoints"</span>: [<span class="text-[#fbbf24]">390</span>, <span class="text-[#fbbf24]">820</span>, <span class="text-[#fbbf24]">1440</span>]
 }`}
-        />
-        <p className="text-[13px] text-stone-400 mt-2 mb-4">
-          Or pass directly: <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">npx boneyard-js build --breakpoints 390,820,1440</code>
-        </p>
-      </section>
+          />
+          <p className="text-[13px] text-stone-400 mt-2 mb-4">
+            Or pass directly: <code className="text-[12px] bg-stone-100 px-1 py-0.5 rounded">npx boneyard-js build --breakpoints 390,820,1440</code>
+          </p>
+        </section>
 
-      {/* How selection works */}
-      <section>
-        <div className="section-divider" id="how-breakpoint-selection-works">
-          <span>How breakpoint selection works</span>
-        </div>
-        <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 space-y-2">
-          <ul className="text-[13px] text-[#78716c] space-y-1.5 list-disc pl-4">
-            <li>
-              <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">&lt;Skeleton&gt;</code>{" "}
-              measures its container width with{" "}
-              <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">ResizeObserver</code>
-            </li>
-            <li>
-              Picks the largest breakpoint that fits (e.g., 500px container → uses 375px bones)
-            </li>
-            <li>
-              Updates automatically on resize — no re-render needed, just swaps the bone set
-            </li>
-            <li>
-              <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">x</code> and{" "}
-              <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">w</code>{" "}
-              are stored as percentages, so bones scale smoothly within a breakpoint range
-            </li>
-          </ul>
-        </div>
-      </section>
-    </div>
+        {/* How selection works */}
+        <section>
+          <div className="section-divider" id="how-breakpoint-selection-works">
+            <span>How breakpoint selection works</span>
+          </div>
+          <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 space-y-2">
+            <ul className="text-[13px] text-[#78716c] space-y-1.5 list-disc pl-4">
+              <li>
+                <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">&lt;Skeleton&gt;</code>{" "}
+                measures its container width with{" "}
+                <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">ResizeObserver</code>
+              </li>
+              <li>
+                Picks the largest breakpoint that fits (e.g., 500px container &rarr; uses 375px bones)
+              </li>
+              <li>
+                Updates automatically on resize — no re-render needed, just swaps the bone set
+              </li>
+              <li>
+                <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">x</code> and{" "}
+                <code className="text-[12px] bg-white px-1 py-0.5 rounded border border-stone-200">w</code>{" "}
+                are stored as percentages, so bones scale smoothly within a breakpoint range
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
 
-    <TableOfContents items={tocItems} />
+      <TableOfContents items={tocItems} />
     </>
   );
 }

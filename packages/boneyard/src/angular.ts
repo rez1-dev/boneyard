@@ -12,7 +12,7 @@ import {
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { normalizeBone } from './types.js'
-import type { AnyBone, SkeletonResult, ResponsiveBones, SnapshotConfig } from './types.js'
+import type { AnyBone, SkeletonResult, ResponsiveBones, SnapshotConfig, AnimationStyle } from './types.js'
 import {
   adjustColor,
   ensureBuildSnapshotHook,
@@ -20,12 +20,14 @@ import {
   isBuildMode,
   registerBones,
   resolveResponsive,
+  SHIMMER,
+  PULSE,
+  CONTAINER,
+  DEFAULTS,
 } from './shared.js'
 
 export { registerBones }
-
-// ── Global defaults ─────────────────────────────────────────────────────────
-export type AnimationStyle = 'pulse' | 'shimmer' | 'solid' | boolean
+export type { AnimationStyle }
 
 interface BoneyardConfig {
   color?: string
@@ -90,7 +92,7 @@ ensureBuildSnapshotHook()
         >
           <div style="position:relative;width:100%;height:100%;">
             <div
-              *ngFor="let bone of activeBones.bones; let i = index; trackBy: trackBone"
+              *ngFor="let bone of visibleBones; let i = index; trackBy: trackBone"
               data-boneyard-bone="true"
               [class]="resolvedBoneClass"
               [style]="getBoneStyle(bone, i)"
@@ -165,8 +167,8 @@ export class SkeletonComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   get resolvedColor(): string {
     return this.isDark
-      ? (this.darkColor ?? _globalConfig.darkColor ?? 'rgba(255,255,255,0.06)')
-      : (this.color ?? _globalConfig.color ?? 'rgba(0,0,0,0.08)')
+      ? (this.darkColor ?? _globalConfig.darkColor ?? DEFAULTS.web.dark)
+      : (this.color ?? _globalConfig.color ?? DEFAULTS.web.light)
   }
 
   get animationStyle(): 'pulse' | 'shimmer' | 'solid' {
@@ -259,7 +261,8 @@ export class SkeletonComponent implements AfterViewInit, OnDestroy, OnChanges {
   private updateDarkMode(): void {
     if (typeof window === 'undefined') return
     const el = this.containerRef?.nativeElement
-    this.isDark =
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    this.isDark = mq.matches ||
       document.documentElement.classList.contains('dark') ||
       !!el?.closest('.dark')
   }
@@ -277,6 +280,10 @@ export class SkeletonComponent implements AfterViewInit, OnDestroy, OnChanges {
     return index
   }
 
+  get visibleBones(): AnyBone[] {
+    return (this.activeBones?.bones as AnyBone[] ?? []).filter(raw => !normalizeBone(raw).c)
+  }
+
   isContainerBone(raw: AnyBone): boolean {
     return Array.isArray(raw) ? !!raw[5] : !!raw.c
   }
@@ -284,22 +291,25 @@ export class SkeletonComponent implements AfterViewInit, OnDestroy, OnChanges {
   getBoneStyle(raw: AnyBone, index: number = 0): string {
     const bone = normalizeBone(raw)
     const radius = typeof bone.r === 'string' ? bone.r : `${bone.r}px`
-    const boneColor = bone.c ? adjustColor(this.resolvedColor, this.isDark ? 0.03 : 0.45) : this.resolvedColor
+    const boneColor = this.resolvedColor
+    const capturedPxW = (bone.w / 100) * (this.activeBones?.width ?? 0)
+    const isCircle = bone.r === '50%' && (this.activeBones?.width ?? 0) > 0 && Math.abs(capturedPxW - bone.h) < 4
+    const w = isCircle ? `${bone.h * this.scaleY}px` : `${bone.w}%`
     const stagger = this.staggerMs > 0
       ? `opacity:0;animation:by-${this.uid} 0.3s ease-out ${index * this.staggerMs}ms forwards;`
       : ''
-    return `position:absolute;left:${bone.x}%;top:${bone.y * this.scaleY}px;width:${bone.w}%;height:${bone.h * this.scaleY}px;border-radius:${radius};background-color:${boneColor};overflow:hidden;${stagger}`
+    return `position:absolute;left:${bone.x}%;top:${bone.y * this.scaleY}px;width:${w};height:${bone.h * this.scaleY}px;border-radius:${radius};background-color:${boneColor};overflow:hidden;${stagger}`
   }
 
   getOverlayStyle(): string {
     const anim = this.animationStyle
     if (anim === 'solid') return ''
-    const lighterColor = adjustColor(this.resolvedColor, this.isDark ? 0.04 : 0.3)
+    const lighterColor = adjustColor(this.resolvedColor, this.isDark ? PULSE.darkAdjust : PULSE.lightAdjust)
     if (anim === 'pulse') {
-      return `position:absolute;inset:0;background-color:${lighterColor};animation:bp-${this.uid} 1.8s ease-in-out infinite;`
+      return `position:absolute;inset:0;background-color:${lighterColor};animation:bp-${this.uid} ${PULSE.speed} ease-in-out infinite;`
     }
     if (anim === 'shimmer') {
-      return `position:absolute;inset:0;background:linear-gradient(90deg, transparent 30%, ${lighterColor} 50%, transparent 70%);background-size:200% 100%;animation:bs-${this.uid} 2.4s linear infinite;`
+      return `position:absolute;inset:0;background:linear-gradient(${SHIMMER.angle}deg, transparent ${SHIMMER.start}%, ${lighterColor} 50%, transparent ${SHIMMER.end}%);background-size:200% 100%;animation:bs-${this.uid} ${SHIMMER.speed} linear infinite;`
     }
     return ''
   }
