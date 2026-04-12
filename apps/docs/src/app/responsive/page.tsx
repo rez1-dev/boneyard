@@ -1,8 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { snapshotBones } from "boneyard-js";
-import type { Bone } from "boneyard-js";
+import { Skeleton } from "boneyard-js/react";
 import { BrowserMockup } from "@/components/browser-mockup";
 import { CodeBlock } from "@/components/ui/code-block";
 import { TableOfContents } from "@/components/toc";
@@ -68,49 +66,13 @@ function ProductCard({ layout }: { layout: "mobile" | "tablet" | "desktop" }) {
   );
 }
 
-// ── Skeleton extractor ──
+// ── Skeleton preview using the actual <Skeleton> component ──
 
-function SkeletonPreview({ children }: { children: React.ReactNode }) {
-  const sourceRef = useRef<HTMLDivElement>(null);
-  const [bones, setBones] = useState<{ bones: Bone[]; height: number } | null>(null);
-
-  useEffect(() => {
-    if (!sourceRef.current) return;
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (!sourceRef.current) return;
-        try {
-          const result = snapshotBones(sourceRef.current, "responsive-demo");
-          setBones(result);
-        } catch {}
-      });
-    });
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
+function SkeletonPreview({ children, name }: { children: React.ReactNode; name?: string }) {
   return (
-    <div className="relative">
-      <div ref={sourceRef} style={bones ? { visibility: "hidden", position: "absolute" } : undefined}>
-        {children}
-      </div>
-      {bones && (
-        <div className="relative w-full" style={{ height: bones.height }}>
-          {bones.bones.map((b: Bone, i: number) => (
-            <div
-              key={i}
-              className="bone absolute"
-              style={{
-                left: `${b.x}%`,
-                top: b.y,
-                width: `${b.w}%`,
-                height: b.h,
-                borderRadius: typeof b.r === "string" ? b.r : `${b.r}px`,
-              }}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <Skeleton name={name} loading={true} animate="shimmer">
+      {children}
+    </Skeleton>
   );
 }
 

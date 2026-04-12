@@ -229,10 +229,7 @@ export function Skeleton({
   const showSkeleton = (loading || transitioning) && activeBones
   const showFallback = loading && !activeBones && !transitioning
 
-  // Scale vertical positions to match actual container height
-  const effectiveHeight = containerHeight > 0 ? containerHeight : activeBones?.height ?? 0
-  const capturedHeight = activeBones?.height ?? 0
-  const scaleY = (effectiveHeight > 0 && capturedHeight > 0) ? effectiveHeight / capturedHeight : 1
+  // Use captured height directly — no vertical scaling to avoid distortion
 
   return (
     <div ref={containerRef} className={className} style={{ position: 'relative' }} {...dataAttrs}>
@@ -254,9 +251,9 @@ export function Skeleton({
               const boneStyle: Record<string, any> = {
                 position: 'absolute',
                 left: `${b.x}%`,
-                top: b.y * scaleY,
+                top: b.y,
                 width: `${b.w}%`,
-                height: b.h * scaleY,
+                height: b.h,
                 borderRadius: typeof b.r === 'string' ? b.r : `${b.r}px`,
                 backgroundColor: boneColor,
               }

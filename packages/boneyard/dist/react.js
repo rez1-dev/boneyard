@@ -133,10 +133,7 @@ export function Skeleton({ loading, children, name, initialBones, color, darkCol
     }, [loading, transitionMs, activeBones]);
     const showSkeleton = (loading || transitioning) && activeBones;
     const showFallback = loading && !activeBones && !transitioning;
-    // Scale vertical positions to match actual container height
-    const effectiveHeight = containerHeight > 0 ? containerHeight : activeBones?.height ?? 0;
-    const capturedHeight = activeBones?.height ?? 0;
-    const scaleY = (effectiveHeight > 0 && capturedHeight > 0) ? effectiveHeight / capturedHeight : 1;
+    // Use captured height directly — no vertical scaling to avoid distortion
     return (_jsxs("div", { ref: containerRef, className: className, style: { position: 'relative' }, ...dataAttrs, children: [_jsx("div", { "data-boneyard-content": "true", style: showSkeleton && !transitioning ? { visibility: 'hidden' } : undefined, children: showFallback ? fallback : children }), showSkeleton && (_jsx("div", { "data-boneyard-overlay": "true", style: {
                     position: 'absolute', inset: 0, overflow: 'hidden',
                     opacity: transitioning ? 0 : 1,
@@ -148,9 +145,9 @@ export function Skeleton({ loading, children, name, initialBones, color, darkCol
                             const boneStyle = {
                                 position: 'absolute',
                                 left: `${b.x}%`,
-                                top: b.y * scaleY,
+                                top: b.y,
                                 width: `${b.w}%`,
-                                height: b.h * scaleY,
+                                height: b.h,
                                 borderRadius: typeof b.r === 'string' ? b.r : `${b.r}px`,
                                 backgroundColor: boneColor,
                             };
