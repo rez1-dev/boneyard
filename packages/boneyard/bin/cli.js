@@ -901,7 +901,8 @@ for (const [name, data] of Object.entries(collected)) {
 
 // ── Generate registry.js ─────────────────────────────────────────────────────
 const names = Object.keys(collected)
-const hasRuntimeConfig = config.color || config.darkColor || config.animate !== undefined
+const runtimeKeys = ['color', 'darkColor', 'animate', 'shimmerColor', 'darkShimmerColor', 'speed', 'shimmerAngle', 'stagger', 'transition', 'boneClass']
+const hasRuntimeConfig = runtimeKeys.some(k => config[k] !== undefined)
 // Detect framework for registry import — registerBones is always from the base
 // package (shared across all adapters), configureBoneyard needs the framework path
 function detectFramework() {
@@ -945,9 +946,9 @@ registryLines.push('')
 // Emit configureBoneyard call if runtime defaults exist in config
 if (hasRuntimeConfig) {
   const runtimeConfig = {}
-  if (config.color) runtimeConfig.color = config.color
-  if (config.darkColor) runtimeConfig.darkColor = config.darkColor
-  if (config.animate !== undefined) runtimeConfig.animate = config.animate
+  for (const k of runtimeKeys) {
+    if (config[k] !== undefined) runtimeConfig[k] = config[k]
+  }
   registryLines.push(`configureBoneyard(${JSON.stringify(runtimeConfig)})`)
   registryLines.push('')
 }

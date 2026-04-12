@@ -22,7 +22,6 @@ import {
   resolveResponsive,
   SHIMMER,
   PULSE,
-  CONTAINER,
   DEFAULTS,
 } from './shared.js'
 
@@ -98,7 +97,7 @@ ensureBuildSnapshotHook()
               [style]="getBoneStyle(bone, i)"
             >
               <div
-                *ngIf="animationStyle !== 'solid' && !isContainerBone(bone)"
+                *ngIf="animationStyle !== 'solid'"
                 [style]="getOverlayStyle()"
               ></div>
             </div>
@@ -281,10 +280,6 @@ export class SkeletonComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   get visibleBones(): AnyBone[] {
     return (this.activeBones?.bones as AnyBone[] ?? []).filter(raw => !normalizeBone(raw).c)
-  }
-
-  isContainerBone(raw: AnyBone): boolean {
-    return Array.isArray(raw) ? !!raw[5] : !!raw.c
   }
 
   getBoneStyle(raw: AnyBone, index: number = 0): string {

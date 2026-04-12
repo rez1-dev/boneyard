@@ -7,7 +7,7 @@ Skeleton screen generator that snapshots real UI into positioned rectangles ("bo
 - `packages/boneyard/` — core library (React component, CLI, extraction logic)
   - `src/react.tsx` — `<Skeleton>` React component
   - `src/extract.ts` — DOM walker that captures bones (handles `leafTags`, `excludeTags`, etc.)
-  - `src/shared.ts` — bone registry (`getRegisteredBones`, `registerBones`, `isBuildMode`)
+  - `src/shared.ts` — bone registry, animation constants (SHIMMER, PULSE, DEFAULTS)
   - `src/types.ts` — `SnapshotConfig`, `BoneData`, etc.
   - `bin/cli.js` — CLI entry point (`boneyard-js build`)
 - `apps/docs/` — Next.js docs site (Turbopack)
@@ -23,6 +23,10 @@ Skeleton screen generator that snapshots real UI into positioned rectangles ("bo
 - **leafTags**: `snapshotConfig={{ leafTags: ["section"] }}` tells the extractor to treat those tags as atomic — no recursion into children. This prevents internal elements (text, icons, bars) from becoming separate bones.
 - **Priority**: explicit `initialBones` prop > registry lookup by `name` > fixture fallback.
 - **Build mode**: CLI sets `window.__BONEYARD_BUILD = true`, component renders `fixture ?? children`, CLI snapshots the DOM, writes bones JSON.
+- **Config**: `boneyard.config.json` is the primary customization point. Runtime options (`color`, `darkColor`, `animate`, `shimmerColor`, `speed`, etc.) are baked into the generated `registry.js` via `configureBoneyard()`. Per-component props override config.
+- **Dark mode**: detected via `.dark` class on `<html>` or ancestor. Does NOT use `prefers-color-scheme` — gives app developer explicit control.
+- **Container bones**: bones with `c: true` are skipped during rendering. They represent parent backgrounds and would cause opacity overlap if rendered alongside child bones.
+- **Animation constants**: centralized in `shared.ts` (SHIMMER, PULSE, DEFAULTS). All frameworks import from there. Users override via `boneyard.config.json`, not by editing constants.
 
 ## CLI usage
 

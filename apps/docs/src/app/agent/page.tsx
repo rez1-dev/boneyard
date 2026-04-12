@@ -112,12 +112,12 @@ Or use \`snapshotConfig\` for more control:
 
 ## Dark mode
 
-The component auto-detects dark mode via the \`.dark\` class on \`<html>\` or any parent element (standard Tailwind convention). It uses \`darkColor\` when dark mode is active.
+The component auto-detects dark mode via the \`.dark\` class on \`<html>\` or any parent element (standard Tailwind convention). It uses \`darkColor\` when dark mode is active. Does NOT use \`prefers-color-scheme\` — only the \`.dark\` class, giving the app developer explicit control.
 
-You can also pass colors explicitly:
+Colors are best set in \`boneyard.config.json\`. Per-component overrides:
 
 \`\`\`tsx
-<Skeleton color="rgba(0,0,0,0.08)" darkColor="rgba(255,255,255,0.06)" />
+<Skeleton color="#e5e5e5" darkColor="#2a2a2a" />
 \`\`\`
 
 ### Skeleton props
@@ -128,8 +128,8 @@ You can also pass colors explicitly:
 | name | string | required | Unique name — the CLI uses this to generate the \`.bones.json\` file |
 | fixture | ReactNode | — | Mock content rendered only during \`npx boneyard-js build\`. Never touches production |
 | initialBones | ResponsiveBones | — | Optional manual override. If you use the registry, you don't need this |
-| color | string | rgba(0,0,0,0.08) | Bone fill color for light mode |
-| darkColor | string | rgba(255,255,255,0.06) | Bone fill color for dark mode (\`.dark\` class) |
+| color | string | #f0f0f0 | Bone fill color for light mode |
+| darkColor | string | #222222 | Bone fill color for dark mode (\`.dark\` class) |
 | animate | "pulse" &#124; "shimmer" &#124; "solid" | "pulse" | Animation style (also accepts true/false) |
 | className | string | — | Extra CSS class on the wrapper div |
 | fallback | ReactNode | — | What to show if bones haven't been generated yet |
@@ -261,7 +261,7 @@ Tailwind breakpoints are auto-detected from your config.
 
 ## Config file
 
-Create \`boneyard.config.json\` in your project root. Controls both the CLI build and runtime defaults for all \`<Skeleton>\` components:
+Create \`boneyard.config.json\` in your project root. This is the primary way to customize boneyard. Controls both the CLI build and runtime defaults for all \`<Skeleton>\` components:
 
 \`\`\`json
 {
@@ -269,12 +269,37 @@ Create \`boneyard.config.json\` in your project root. Controls both the CLI buil
   "out": "./src/bones",
   "wait": 800,
   "color": "#e5e5e5",
-  "darkColor": "rgba(255,255,255,0.08)",
-  "animate": "pulse"
+  "darkColor": "#2a2a2a",
+  "animate": "shimmer",
+  "shimmerColor": "#ebebeb",
+  "darkShimmerColor": "#333333",
+  "speed": "2s",
+  "shimmerAngle": 110
 }
 \`\`\`
 
-Runtime defaults (\`color\`, \`darkColor\`, \`animate\`) are automatically included in the generated \`registry.js\`. Per-component props and CLI flags override config values. \`animate\` accepts \`"pulse"\`, \`"shimmer"\`, or \`"solid"\`.
+### Build-time options
+| Key | Default | Description |
+|-----|---------|-------------|
+| breakpoints | [375, 768, 1280] | Viewport widths captured by CLI |
+| out | ./src/bones | Output directory |
+| wait | 800 | ms to wait after page load before capturing |
+
+### Runtime options (baked into registry.js)
+| Key | Default | Description |
+|-----|---------|-------------|
+| color | #f0f0f0 | Bone fill color (light mode) |
+| darkColor | #222222 | Bone fill color (dark mode, \`.dark\` class) |
+| animate | "pulse" | Animation: "pulse", "shimmer", or "solid" |
+| shimmerColor | #f2f2f2 | Shimmer highlight color (light mode) |
+| darkShimmerColor | #282828 | Shimmer highlight color (dark mode) |
+| speed | "2s" (shimmer) / "1.8s" (pulse) | Animation duration |
+| shimmerAngle | 110 | Shimmer gradient angle in degrees |
+| stagger | false | Delay between bones in ms (true = 80ms) |
+| transition | false | Fade transition when loading ends in ms (true = 300ms) |
+| boneClass | — | CSS class applied to each bone element |
+
+Runtime options are automatically included in the generated \`registry.js\` via \`configureBoneyard()\`. Per-component props override config values.
 
 ## Package exports
 

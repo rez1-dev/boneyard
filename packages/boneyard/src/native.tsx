@@ -26,7 +26,6 @@ import {
   DEFAULTS,
   NATIVE_SHIMMER,
   PULSE,
-  CONTAINER,
 } from './shared.js'
 
 export type { AnimationStyle }

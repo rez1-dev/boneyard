@@ -32,7 +32,6 @@
     resolveResponsive,
     SHIMMER,
     PULSE,
-    CONTAINER,
     DEFAULTS,
   } from './shared.js'
 

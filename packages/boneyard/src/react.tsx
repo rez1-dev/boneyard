@@ -10,7 +10,6 @@ import {
   resolveResponsive,
   SHIMMER,
   PULSE,
-  CONTAINER,
   DEFAULTS,
 } from './shared.js'
 
@@ -26,6 +25,14 @@ interface BoneyardConfig {
   stagger?: number | boolean
   transition?: number | boolean
   boneClass?: string
+  /** Shimmer highlight color (light mode). Default: '#f2f2f2' */
+  shimmerColor?: string
+  /** Shimmer highlight color (dark mode). Default: '#282828' */
+  darkShimmerColor?: string
+  /** Animation duration, e.g. '2s' or '1.5s'. Applies to the active animation style. */
+  speed?: string
+  /** Shimmer gradient angle in degrees. Default: 110 */
+  shimmerAngle?: number
 }
 
 let globalConfig: BoneyardConfig = {}
@@ -264,14 +271,18 @@ export function Skeleton({
                 borderRadius: typeof b.r === 'string' ? b.r : `${b.r}px`,
                 backgroundColor: boneColor,
               }
+              const effectiveSpeed = globalConfig.speed
               if (animationStyle === 'pulse') {
-                boneStyle.animation = `bp-${uid} ${PULSE.speed} ease-in-out infinite`
+                boneStyle.animation = `bp-${uid} ${effectiveSpeed ?? PULSE.speed} ease-in-out infinite`
               } else if (animationStyle === 'shimmer') {
-                const shimmerHighlight = isDark ? SHIMMER.darkHighlight : SHIMMER.lightHighlight
+                const shimmerHighlight = isDark
+                  ? (globalConfig.darkShimmerColor ?? SHIMMER.darkHighlight)
+                  : (globalConfig.shimmerColor ?? SHIMMER.lightHighlight)
+                const angle = globalConfig.shimmerAngle ?? SHIMMER.angle
                 delete boneStyle.backgroundColor
-                boneStyle.backgroundImage = `linear-gradient(${SHIMMER.angle}deg, ${boneColor} ${SHIMMER.start}%, ${shimmerHighlight} 50%, ${boneColor} ${SHIMMER.end}%)`
+                boneStyle.backgroundImage = `linear-gradient(${angle}deg, ${boneColor} ${SHIMMER.start}%, ${shimmerHighlight} 50%, ${boneColor} ${SHIMMER.end}%)`
                 boneStyle.backgroundSize = '200% 100%'
-                boneStyle.animation = `bs-${uid} ${SHIMMER.speed} linear infinite`
+                boneStyle.animation = `bs-${uid} ${effectiveSpeed ?? SHIMMER.speed} linear infinite`
               }
               if (staggerMs > 0) {
                 boneStyle.opacity = 0
